@@ -26,16 +26,16 @@ async def fetch_player_update(id, gws, players_aPts_dicts):
             try:
                 player_info_data = await response.json(content_type=None)
                 player_history = player_info_data['history']
-                player_aPts = [player['total_points'] for player in player_history if player['round'] in gws]
                 
-                if len(player_aPts) == 0:
-                    raise Exception(f"\nPlayer {id} didn't play in GW(s) {gws}!\n")
-        
-                player_aPts += [0] * (len(gws)-len(player_aPts))
-                player_aPts.append(sum(player_aPts))
-            
-                for i in range(len(gws)+1):
-                    players_aPts_dicts[i][id] = player_aPts[i]
+                players_aPts_dicts[-1][id] = 0
+                for i in range(len(gws)):
+                    gwPts = 0
+                    for history in player_history:
+                        if history['round'] == gws[i]:
+                            gwPts += history['total_points']
+                    players_aPts_dicts[i][id] = gwPts
+                    players_aPts_dicts[-1][id] += gwPts
+
             except Exception as e:
                 print(e)
                 print(f"\nThere was a problem fetching update for player {id}\n")
