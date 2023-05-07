@@ -271,7 +271,7 @@ att_teams_stats_df = att_teams_stats_df.sort_values(['attAdv_nxtGWs','att_rank']
 
 
 
-players_df.loc[(players_df['xPts'] < 0) | (players_df['form'] <= 0), 'xPts'] = 0
+players_df.loc[(players_df['pts/game'] <= 0) | (players_df['form'] <= 0) | (players_df['xPts'] < 0), 'xPts'] = 0
 
 players_df['fplAdv_nxtGWs'] = players_df['team'].map(fpl_teamsAdv_dict)
 players_df.loc[players_df['fplAdv_nxtGWs'] >= 0, 'fplAdv*xPts'] = players_df['fplAdv_nxtGWs'] * players_df['xPts']
