@@ -11,7 +11,10 @@ To install FPL Naive Predictor, follow these steps:
 
 Clone the repository to your local machine using Git or download the zip file.
 Install the required dependencies using pip. You can do this by running the following command in your terminal or command prompt:
+
+```bash
 pip install -r requirements.txt
+```
 
 
 
