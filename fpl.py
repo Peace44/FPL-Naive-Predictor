@@ -463,19 +463,19 @@ def best_team_str(best_team, selection_criterion):
         grouped_team[player["position"]].append(player)
 
     ans += f"\nBEST TEAM according to {selection_criterion}:\n"
-    ans += "####################################################################################################################################################################################################\n"
+    ans += "##############################################################################################################################################################################################################\n"
     for position, players in grouped_team.items():
         str1 = f"#     {position}: "
         ans += str1
         sorted_players = sorted(players, key=lambda x: x[selection_criterion], reverse=True)
         player_strings = [f"{player['web_name']} ({player['team']}) ==> {player[selection_criterion]:.3f}" for player in sorted_players]
-        str2 = ", ".join(player_strings)
+        str2 = " /|\ ".join(player_strings)
         ans += str2
 
-        for i in range(len(str1 + str2), 195):
+        for i in range(len(str1 + str2), 205):
             ans += ' '
         ans += '#\n'
-    ans += "####################################################################################################################################################################################################\n"
+    ans += "##############################################################################################################################################################################################################\n"
     ans += "\n\n\n\n\n"
 
     return ans
