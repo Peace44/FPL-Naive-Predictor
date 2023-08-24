@@ -98,7 +98,7 @@ upcoming_fixtures_data = response.json()
 nxtGW = upcoming_fixtures_data[0]["event"]
 
 prvGWsPtsTrendAvailability = False
-if input(f"Do you have data on GW{nxtGW-2} & GW{nxtGW-1} (nxtGWs)PtsTrends ('vvv', 'vv', 'v', '~', '^^^', '^^', '^) [Y/n]?   ").lower()[0] == 'y':
+if input(f"Do you have previous gameweeks (nxtGWs)PtsTrends ('vvv', 'vv', 'v', '~', '^^^', '^^', '^) data [Y/n]?   ").lower()[0] == 'y':
     prvGWsPtsTrendAvailability = True
 
 if prvGWsPtsTrendAvailability:
@@ -205,15 +205,18 @@ att_teams_stats_df = att_teams_stats_df.set_index('team', drop=False)
 
 
 ######################################################################################################################################################################################################################################################################################################################################
-nberOfGWsInAdvance = int(input(f"\n\n\nThe next Gameweek is GW{nxtGW}\nHow many GWs do you want to simulate in advance (1, 2, or 3)?   "))
-if nberOfGWsInAdvance not in [1, 2, 3]:
+nberOfGWsInAdvance = int(input(f"\n\n\nThe next gameweek is GW{nxtGW}\nHow many gameweeks do you want to simulate in advance (1, 2, 3, or 4)?   "))
+if nberOfGWsInAdvance not in [1, 2, 3, 4]:
     sys.exit("\n\n\n    !Bye-\n-Bye!\n\n\n")
 
-gws = [upcoming_fixtures_data[0]["event"], upcoming_fixtures_data[0]["event"] + 1]
-if nberOfGWsInAdvance == 1:
-    gws.remove(upcoming_fixtures_data[0]["event"] + 1)
-elif nberOfGWsInAdvance == 3:
+gws = [upcoming_fixtures_data[0]["event"]] 
+
+if nberOfGWsInAdvance >= 2:
+    gws.append(upcoming_fixtures_data[0]["event"] + 1)
+if nberOfGWsInAdvance >= 3:
     gws.append(upcoming_fixtures_data[0]["event"] + 2)
+if nberOfGWsInAdvance == 4:
+    gws.append(upcoming_fixtures_data[0]["event"] + 3)
 
 nxtGWs_fixtures = []
 fpl_teamsAdv_dict = {}
