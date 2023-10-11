@@ -157,9 +157,17 @@ players_df = players_df.sort_values(['team', 'form', 'pts/game' ,'tot_pts'], asc
 
 
 ######################################################################################################################################################################################################################################################################################################################################
-fpl_teams_stats_df = players_df.groupby('team').sum(numeric_only=True).reset_index()
+fpl_teams_stats_df = players_df.groupby('team').sum(numeric_only=True).reset_index().drop('id', axis='columns')
+
+defensive_players = players_df[(players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')] # gkps and defs
+attacking_players = players_df[(players_df['position'] == 'MID') | (players_df['position'] == 'FWD')] # mids and fwds
+
+fpl_teams_stats_df.insert(1, 'tot_att_pts', attacking_players.groupby('team').sum(numeric_only=True).reset_index()['tot_pts'])
+fpl_teams_stats_df.insert(2, 'tot_def_pts', defensive_players.groupby('team').sum(numeric_only=True).reset_index()['tot_pts'])
 
 fpl_teams_stats_df['matches_played'] = fpl_teams_stats_df['team'].map(matches_played_dict)
+fpl_teams_stats_df['avg_att_pts/match'] = round(fpl_teams_stats_df['tot_att_pts'] / fpl_teams_stats_df['matches_played'], 5)
+fpl_teams_stats_df['avg_def_pts/match'] = round(fpl_teams_stats_df['tot_def_pts'] / fpl_teams_stats_df['matches_played'], 5)
 fpl_teams_stats_df['avg_pts/match'] = round(fpl_teams_stats_df['tot_pts'] / fpl_teams_stats_df['matches_played'], 5)
 fpl_teams_stats_df['xPts'] = round((1/5)*fpl_teams_stats_df['form'] + (4/5)*fpl_teams_stats_df['avg_pts/match'], 5)   # [1/5 and 4/5 approximate h = (2f - f^2) and (1-h) to 1 decimal ==> ... and h ~ 0.8541]
 fpl_teams_stats_df['goals_for'] = fpl_teams_stats_df['team'].map(goals_for_dict)
@@ -168,8 +176,8 @@ fpl_teams_stats_df['clean_sheets'] = fpl_teams_stats_df['team'].map(clean_sheets
 fpl_teams_stats_df['avg_GF/match'] = round(fpl_teams_stats_df['goals_for'] / fpl_teams_stats_df['matches_played'], 5)
 fpl_teams_stats_df['avg_GA/match'] = round(fpl_teams_stats_df['goals_against'] / fpl_teams_stats_df['matches_played'], 5)
 fpl_teams_stats_df['avg_CS/match'] = round(fpl_teams_stats_df['clean_sheets'] / fpl_teams_stats_df['matches_played'], 5)
-fpl_teams_stats_df = fpl_teams_stats_df[['team','goals_for','goals_against','clean_sheets','tot_pts','matches_played','avg_GF/match','avg_GA/match','avg_CS/match','avg_pts/match','form', 'xPts']]
 fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['xPts','avg_pts/match','tot_pts'], ascending=[False,False,False]).reset_index(drop=True)
+fpl_teams_stats_df = fpl_teams_stats_df[['team','avg_GF/match','avg_GA/match','avg_CS/match','avg_att_pts/match','avg_def_pts/match','avg_pts/match','form', 'xPts']]
 fpl_teams_stats_df.insert(0, 'fpl_rank', 1 + fpl_teams_stats_df['team'].index)
 fpl_teams_stats_df.insert(1, 'fpl_tier', 1 + fpl_teams_stats_df['team'].index//4)
 fpl_teams_stats_df = fpl_teams_stats_df.set_index('team', drop=False)
@@ -181,11 +189,11 @@ fpl_teams_stats_df = fpl_teams_stats_df.set_index('team', drop=False)
 
 
 ######################################################################################################################################################################################################################################################################################################################################
-def_df = fpl_teams_stats_df[['avg_CS/match','avg_GA/match','avg_GF/match']]
-att_df = fpl_teams_stats_df[['avg_GF/match','avg_GA/match','avg_CS/match']]
+def_df = fpl_teams_stats_df[['avg_def_pts/match','avg_CS/match','avg_GA/match','avg_GF/match']]
+att_df = fpl_teams_stats_df[['avg_att_pts/match','avg_GF/match','avg_GA/match','avg_CS/match']]
 
-def_teams_stats_df = def_df.sort_values(['avg_CS/match','avg_GA/match','avg_GF/match'], ascending=[False,True,False]).reset_index(drop=False)
-att_teams_stats_df = att_df.sort_values(['avg_GF/match','avg_GA/match','avg_CS/match'], ascending=[False,True,False]).reset_index(drop=False)
+def_teams_stats_df = def_df.sort_values(['avg_def_pts/match','avg_CS/match','avg_GA/match','avg_GF/match'], ascending=[False,False,True,False]).reset_index(drop=False)
+att_teams_stats_df = att_df.sort_values(['avg_att_pts/match','avg_GF/match','avg_GA/match','avg_CS/match'], ascending=[False,False,True,False]).reset_index(drop=False)
 
 def_teams_stats_df.insert(0, 'def_rank', 1 + def_teams_stats_df['team'].index)
 def_teams_stats_df.insert(1, 'def_tier', 1 + def_teams_stats_df['team'].index//4)
@@ -336,14 +344,14 @@ avg_teams_advanced_stats_df = avg_teams_stats_df[['team', 'attAdv_nxtGWs', 'defA
 avg_teams_advanced_stats_df.insert(0, 'att_rank', att_teams_stats_df['att_rank'])
 avg_teams_advanced_stats_df.insert(1, 'def_rank', def_teams_stats_df['def_rank'])
 avg_teams_advanced_stats_df.insert(2, 'diff=(def-att)_rank', avg_teams_advanced_stats_df['def_rank'] - avg_teams_advanced_stats_df['att_rank'])
-avg_teams_advanced_stats_df.insert(4, 'avg_GF/match', att_teams_stats_df['avg_GF/match'])
-avg_teams_advanced_stats_df.insert(5, 'avg_GA/match', def_teams_stats_df['avg_GA/match'])
-avg_teams_advanced_stats_df.insert(6, '(avg_GF/match)-1/(avg_GA/match)', +1*pow(avg_teams_advanced_stats_df['avg_GF/match'], +1) -1*pow(avg_teams_advanced_stats_df['avg_GA/match'], -1))
+avg_teams_advanced_stats_df.insert(4, 'avg_att_pts/match', att_teams_stats_df['avg_att_pts/match'])
+avg_teams_advanced_stats_df.insert(5, 'avg_def_pts/match', def_teams_stats_df['avg_def_pts/match'])
+avg_teams_advanced_stats_df.insert(6, 'avg_(att-def)_pts/match', avg_teams_advanced_stats_df['avg_att_pts/match'] - avg_teams_advanced_stats_df['avg_def_pts/match'])
 avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] = avg_teams_advanced_stats_df['attAdv_nxtGWs'] - avg_teams_advanced_stats_df['defAdv_nxtGWs']
 avg_teams_advanced_stats_df['#OfMatches_nxtGWs'] = avg_teams_advanced_stats_df['team'].map(teams_nxtGWsNberOfMatches_dict)
 avg_teams_advanced_stats_df['delta/#OfMatches_nxtGWs'] = round(avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] / avg_teams_advanced_stats_df['#OfMatches_nxtGWs'], 2)
 
-avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['delta/#OfMatches_nxtGWs', 'diff=(def-att)_rank', '(avg_GF/match)-1/(avg_GA/match)'], ascending=[True, True, True]) # this sorting puts the more defensively advantaged teams at the top of the table, and vice-versa
+avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['delta/#OfMatches_nxtGWs', 'diff=(def-att)_rank', 'avg_(att-def)_pts/match'], ascending=[True, True, True]) # this sorting puts the more defensively advantaged teams at the top of the table, and vice-versa
 
 avg_teams_advanced_stats_df['#atts'] = pd.DataFrame([i for i in range(0,20)]).index // 5
 avg_teams_advanced_stats_df['#defs'] = 3 - avg_teams_advanced_stats_df['#atts']
