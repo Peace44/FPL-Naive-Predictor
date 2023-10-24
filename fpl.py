@@ -1,6 +1,7 @@
 import math
 import os
 import sys
+import numpy as np
 from numpy import float64
 from numpy import power as pow
 import requests
@@ -177,7 +178,8 @@ fpl_teams_stats_df['avg_GF/match'] = round(fpl_teams_stats_df['goals_for'] / fpl
 fpl_teams_stats_df['avg_GA/match'] = round(fpl_teams_stats_df['goals_against'] / fpl_teams_stats_df['matches_played'], 5)
 fpl_teams_stats_df['avg_CS/match'] = round(fpl_teams_stats_df['clean_sheets'] / fpl_teams_stats_df['matches_played'], 5)
 fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['xPts','avg_pts/match','tot_pts'], ascending=[False,False,False]).reset_index(drop=True)
-fpl_teams_stats_df = fpl_teams_stats_df[['team','avg_GF/match','avg_GA/match','avg_CS/match','avg_att_pts/match','avg_def_pts/match','avg_pts/match','form', 'xPts']]
+fpl_teams_stats_df = fpl_teams_stats_df[['team', 'matches_played', 'avg_GF/match','avg_GA/match','avg_CS/match','avg_att_pts/match','avg_def_pts/match','avg_pts/match','form', 'xPts']]
+
 fpl_teams_stats_df.insert(0, 'fpl_rank', 1 + fpl_teams_stats_df['team'].index)
 fpl_teams_stats_df.insert(1, 'fpl_tier', 1 + fpl_teams_stats_df['team'].index//4)
 fpl_teams_stats_df = fpl_teams_stats_df.set_index('team', drop=False)
@@ -189,14 +191,16 @@ fpl_teams_stats_df = fpl_teams_stats_df.set_index('team', drop=False)
 
 
 ######################################################################################################################################################################################################################################################################################################################################
-def_df = fpl_teams_stats_df[['avg_def_pts/match','avg_GF/match']]
-att_df = fpl_teams_stats_df[['avg_att_pts/match','avg_GF/match']]
+def_df = fpl_teams_stats_df[['avg_GF/match', 'avg_def_pts/match']]
+att_df = fpl_teams_stats_df[['avg_att_pts/match', 'avg_GF/match']]
 
-def_df.insert(1, '(avg_CS/match)+1/(avg_GA/match)', pow(fpl_teams_stats_df['avg_CS/match'], +1) + pow(fpl_teams_stats_df['avg_GA/match'], -1))
-att_df.insert(2, '(avg_CS/match)+1/(avg_GA/match)', def_df['(avg_CS/match)+1/(avg_GA/match)'])
+def_df.insert(2, 'avg_CS/match-log(avg_GA/match,MP)', fpl_teams_stats_df['avg_CS/match'] - (np.log(fpl_teams_stats_df['avg_GA/match'])/np.log(fpl_teams_stats_df['matches_played'])))
+att_df.insert(0, 'avg_CS/match-log(avg_GA/match,MP)', def_df['avg_CS/match-log(avg_GA/match,MP)'])
 
-def_teams_stats_df = def_df.sort_values(['avg_def_pts/match','(avg_CS/match)+1/(avg_GA/match)','avg_GF/match'], ascending=[False,False,False]).reset_index(drop=False)
-att_teams_stats_df = att_df.sort_values(['avg_att_pts/match','avg_GF/match','(avg_CS/match)+1/(avg_GA/match)'], ascending=[False,False,False]).reset_index(drop=False)
+def_teams_stats_df = def_df.sort_values(['avg_CS/match-log(avg_GA/match,MP)', 'avg_def_pts/match', 'avg_GF/match'], ascending=[False,False,False]).reset_index(drop=False)
+att_teams_stats_df = att_df.sort_values(['avg_GF/match', 'avg_att_pts/match', 'avg_CS/match-log(avg_GA/match,MP)'], ascending=[False,False,False]).reset_index(drop=False)
+
+# to get a better correlation for the attacking stats, one might use a composite stat made of avg_GF/match + ln(shots on target that didn't result in a goal)/ln(MP)... The problem is where can I find those stats??!
 
 def_teams_stats_df.insert(0, 'def_rank', 1 + def_teams_stats_df['team'].index)
 def_teams_stats_df.insert(1, 'def_tier', 1 + def_teams_stats_df['team'].index//4)
@@ -272,7 +276,7 @@ nxtGWs_fixtures_df = pd.DataFrame(nxtGWs_fixtures)
 
 
 
-fpl_teams_stats_df = fpl_teams_stats_df[['fpl_rank','fpl_tier','team','avg_pts/match','form', 'xPts']] ###> comment this line to make fpl_teams_stats_df more detailed!
+fpl_teams_stats_df = fpl_teams_stats_df[['fpl_rank','fpl_tier','team', 'form', 'avg_pts/match', 'xPts']] ###> comment this line to make fpl_teams_stats_df more detailed!
 
 fpl_teams_stats_df['fplAdv_nxtGWs'] = fpl_teams_stats_df['team'].map(fpl_teamsAdv_dict)
 fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['fplAdv_nxtGWs','fpl_rank'], ascending=[False,True])
