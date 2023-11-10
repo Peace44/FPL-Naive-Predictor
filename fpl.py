@@ -220,18 +220,26 @@ att_teams_stats_df = att_teams_stats_df.set_index('team', drop=False)
 
 
 ######################################################################################################################################################################################################################################################################################################################################
-nberOfGWsInAdvance = int(input(f"\n\n\nThe next gameweek is GW{nxtGW}\nHow many gameweeks do you want to simulate in advance (1, 2, 3, or 4)?   "))
-if nberOfGWsInAdvance not in [1, 2, 3, 4]:
-    sys.exit("\n\n\n    !Bye-\n-Bye!\n\n\n")
+print(f"\n\n\nThe next gameweek is GW{nxtGW}\n")
 
-gws = [upcoming_fixtures_data[0]["event"]] 
+gws = []
 
-if nberOfGWsInAdvance >= 2:
-    gws.append(upcoming_fixtures_data[0]["event"] + 1)
-if nberOfGWsInAdvance >= 3:
-    gws.append(upcoming_fixtures_data[0]["event"] + 2)
-if nberOfGWsInAdvance == 4:
-    gws.append(upcoming_fixtures_data[0]["event"] + 3)
+if input(f"Do you want to simulate a particular gameweek?\nAnswer 'no' if you want to simulate in advance many contiguous gameweeks starting from the next.\n[Y/n]?   ").lower()[0] == 'y':
+    gwToSimulate = int(input(f"\nWhich one? Enter a number in the range [{nxtGW}, 38]:    "))
+    gws.append(gwToSimulate)
+else:
+    nberOfGWsInAdvance = int(input(f"\nHow many gameweeks do you want to simulate in advance (1, 2, 3, or 4)?   "))
+    if nberOfGWsInAdvance not in [1, 2, 3, 4]:
+        sys.exit("\n\n\n    !Bye-\n-Bye!\n\n\n")
+
+    gws.append(nxtGW) 
+
+    if nberOfGWsInAdvance >= 2:
+        gws.append(nxtGW + 1)
+    if nberOfGWsInAdvance >= 3:
+        gws.append(nxtGW + 2)
+    if nberOfGWsInAdvance == 4:
+        gws.append(nxtGW + 3)
 
 nxtGWs_fixtures = []
 fpl_teamsAdv_dict = {}
