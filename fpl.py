@@ -99,7 +99,7 @@ upcoming_fixtures_data = response.json()
 nxtGW = upcoming_fixtures_data[0]["event"]
 
 prvGWsPtsTrendAvailability = False
-if input(f"Do you have previous gameweeks (nxtGWs)PtsTrends ('vvv', 'vv', 'v', '~', '^^^', '^^', '^) data [Y/n]?   ").lower()[0] == 'y':
+if input(f"Do you have previous gameweeks (nxtGWs)PtsTrends ('vvv', 'vv', 'v', '~', '^^^', '^^', '^') data [Y/n]?   ").lower()[0] == 'y':
     prvGWsPtsTrendAvailability = True
 
 if prvGWsPtsTrendAvailability:
@@ -366,7 +366,7 @@ avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] = avg_teams_advanced_st
 avg_teams_advanced_stats_df['#OfMatches_nxtGWs'] = avg_teams_advanced_stats_df['team'].map(teams_nxtGWsNberOfMatches_dict)
 avg_teams_advanced_stats_df['delta/#OfMatches_nxtGWs'] = round(avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] / avg_teams_advanced_stats_df['#OfMatches_nxtGWs'], 2)
 
-avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['delta/#OfMatches_nxtGWs', 'diff=(def-att)_rank', 'avg_(att-def)_pts/match'], ascending=[True, True, True]) # this sorting puts the more defensively advantaged teams at the top of the table, and vice-versa
+avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['delta/#OfMatches_nxtGWs', 'avg_(att-def)_pts/match', 'diff=(def-att)_rank'], ascending=[True, True, True]) # this sorting puts the more defensively advantaged teams at the top of the table, and vice-versa
 
 avg_teams_advanced_stats_df['#atts'] = pd.DataFrame([i for i in range(0,20)]).index // 5
 avg_teams_advanced_stats_df['#defs'] = 3 - avg_teams_advanced_stats_df['#atts']
