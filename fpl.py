@@ -181,7 +181,7 @@ fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['xPts','avg_pts/match','tot
 fpl_teams_stats_df = fpl_teams_stats_df[['team', 'matches_played', 'avg_GF/match','avg_GA/match','avg_CS/match','avg_att_pts/match','avg_def_pts/match','avg_pts/match','form', 'xPts']]
 
 fpl_teams_stats_df.insert(0, 'fpl_rank', 1 + fpl_teams_stats_df['team'].index)
-fpl_teams_stats_df.insert(1, 'fpl_tier', 1 + fpl_teams_stats_df['team'].index//4)
+fpl_teams_stats_df.insert(1, 'fpl_tier', 1 + fpl_teams_stats_df['team'].index//2)
 fpl_teams_stats_df = fpl_teams_stats_df.set_index('team', drop=False)
 
 # print(fpl_teams_stats_df)
@@ -203,10 +203,10 @@ att_teams_stats_df = att_df.sort_values(['avg_GF/match', 'avg_att_pts/match', 'a
 # to get a better correlation for the attacking stats, one might use a composite stat made of avg_GF/match + ln(shots on target that didn't result in a goal)/ln(MP)... The problem is where can I find those stats??!
 
 def_teams_stats_df.insert(0, 'def_rank', 1 + def_teams_stats_df['team'].index)
-def_teams_stats_df.insert(1, 'def_tier', 1 + def_teams_stats_df['team'].index//4)
+def_teams_stats_df.insert(1, 'def_tier', 1 + def_teams_stats_df['team'].index//2)
 
 att_teams_stats_df.insert(0, 'att_rank', 1 + att_teams_stats_df['team'].index)
-att_teams_stats_df.insert(1, 'att_tier', 1 + att_teams_stats_df['team'].index//4)
+att_teams_stats_df.insert(1, 'att_tier', 1 + att_teams_stats_df['team'].index//2)
 
 def_teams_stats_df = def_teams_stats_df.set_index('team', drop=False)
 att_teams_stats_df = att_teams_stats_df.set_index('team', drop=False)
@@ -253,9 +253,9 @@ for fixture in upcoming_fixtures_data:
         home_team = teams_dict[fixture['team_h']]
         away_team = teams_dict[fixture['team_a']]
         
-        fixture_dict['home_attAdv'] = def_teams_stats_df.loc[away_team, 'def_tier'] - att_teams_stats_df.loc[home_team, 'att_tier']
-        fixture_dict['home_defAdv'] = att_teams_stats_df.loc[away_team, 'att_tier'] - def_teams_stats_df.loc[home_team, 'def_tier'] 
-        fixture_dict['home_fplAdv'] = fpl_teams_stats_df.loc[away_team, 'fpl_tier'] - fpl_teams_stats_df.loc[home_team, 'fpl_tier']
+        fixture_dict['home_attAdv'] = round((def_teams_stats_df.loc[away_team, 'def_tier'] - att_teams_stats_df.loc[home_team, 'att_tier'])/9, 3)
+        fixture_dict['home_defAdv'] = round((att_teams_stats_df.loc[away_team, 'att_tier'] - def_teams_stats_df.loc[home_team, 'def_tier'])/9, 3) 
+        fixture_dict['home_fplAdv'] = round((fpl_teams_stats_df.loc[away_team, 'fpl_tier'] - fpl_teams_stats_df.loc[home_team, 'fpl_tier'])/9, 3)
         
         fixture_dict['home_team'] = home_team
         fixture_dict['away_team'] = away_team
@@ -351,7 +351,7 @@ avg_teams_stats_df['avgAdv_nxtGWs'] = round((avg_teams_stats_df['defAdv_nxtGWs']
 avg_teams_stats_df = avg_teams_stats_df.sort_values(['avgAdv_nxtGWs','fplAdv_nxtGWs','fpl_rank'], ascending=[False,False,True]).reset_index(drop=False).drop(columns=['fpl_rank'])
 
 avg_teams_stats_df.insert(0, 'avg_rank', 1 + avg_teams_stats_df['team'].index)
-avg_teams_stats_df.insert(1, 'avg_tier', 1 + avg_teams_stats_df['team'].index//4)
+avg_teams_stats_df.insert(1, 'avg_tier', 1 + avg_teams_stats_df['team'].index//2)
 
 
 
@@ -366,7 +366,7 @@ avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] = avg_teams_advanced_st
 avg_teams_advanced_stats_df['#OfMatches_nxtGWs'] = avg_teams_advanced_stats_df['team'].map(teams_nxtGWsNberOfMatches_dict)
 avg_teams_advanced_stats_df['delta/#OfMatches_nxtGWs'] = round(avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] / avg_teams_advanced_stats_df['#OfMatches_nxtGWs'], 2)
 
-avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['delta/#OfMatches_nxtGWs', 'avg_(att-def)_pts/match', 'diff=(def-att)_rank'], ascending=[True, True, True]) # this sorting puts the more defensively advantaged teams at the top of the table, and vice-versa
+avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['delta/#OfMatches_nxtGWs', 'diff=(def-att)_rank', 'avg_(att-def)_pts/match'], ascending=[True, True, True]) ### IS THE SORTING ORDER THE BEST? I THINK SO!!! IF NOT, INTERCHANGE 'diff...' AND 'avg_(att-def)...' ###
 
 avg_teams_advanced_stats_df['#atts'] = pd.DataFrame([i for i in range(0,20)]).index // 5
 avg_teams_advanced_stats_df['#defs'] = 3 - avg_teams_advanced_stats_df['#atts']
