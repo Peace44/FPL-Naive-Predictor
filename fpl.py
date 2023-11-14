@@ -253,9 +253,9 @@ for fixture in upcoming_fixtures_data:
         home_team = teams_dict[fixture['team_h']]
         away_team = teams_dict[fixture['team_a']]
         
-        fixture_dict['home_attAdv'] = round((def_teams_stats_df.loc[away_team, 'def_tier'] - att_teams_stats_df.loc[home_team, 'att_tier'])/9, 3)
-        fixture_dict['home_defAdv'] = round((att_teams_stats_df.loc[away_team, 'att_tier'] - def_teams_stats_df.loc[home_team, 'def_tier'])/9, 3) 
-        fixture_dict['home_fplAdv'] = round((fpl_teams_stats_df.loc[away_team, 'fpl_tier'] - fpl_teams_stats_df.loc[home_team, 'fpl_tier'])/9, 3)
+        fixture_dict['home_attAdv'] = def_teams_stats_df.loc[away_team, 'def_tier'] - att_teams_stats_df.loc[home_team, 'att_tier']
+        fixture_dict['home_defAdv'] = att_teams_stats_df.loc[away_team, 'att_tier'] - def_teams_stats_df.loc[home_team, 'def_tier'] 
+        fixture_dict['home_fplAdv'] = fpl_teams_stats_df.loc[away_team, 'fpl_tier'] - fpl_teams_stats_df.loc[home_team, 'fpl_tier']
         
         fixture_dict['home_team'] = home_team
         fixture_dict['away_team'] = away_team
@@ -300,22 +300,22 @@ att_teams_stats_df = att_teams_stats_df.sort_values(['attAdv_nxtGWs','att_rank']
 players_df.loc[(players_df['pts/game'] <= 0) | (players_df['form'] <= 0) | (players_df['xPts'] < 0), 'xPts'] = 0
 
 players_df['fplAdv_nxtGWs'] = players_df['team'].map(fpl_teamsAdv_dict)
-players_df.loc[players_df['fplAdv_nxtGWs'] >= 0, 'fplAdv*xPts'] = players_df['fplAdv_nxtGWs'] * players_df['xPts']
-players_df.loc[players_df['fplAdv_nxtGWs'] < 0, 'fplAdv*xPts'] = players_df['fplAdv_nxtGWs'] / players_df['xPts']
+players_df.loc[players_df['fplAdv_nxtGWs'] >= 0, '^fplAdv*xPts'] = (players_df['fplAdv_nxtGWs'] / 9) * players_df['xPts'] ### ^fplAdv is the normalized fplAdv ###
+players_df.loc[players_df['fplAdv_nxtGWs'] < 0, '^fplAdv*xPts'] = (players_df['fplAdv_nxtGWs'] / 9) / players_df['xPts'] 
 
 players_df['defAdv_nxtGWs'] = players_df['team'].map(def_teamsAdv_dict)
-players_df['defAdv*xPts'] = 0
+players_df['^defAdv*xPts'] = 0 ### ^defAdv is the normalized defAdv ###
 
 players_df['attAdv_nxtGWs'] = players_df['team'].map(att_teamsAdv_dict)
-players_df['attAdv*xPts'] = 0
+players_df['^attAdv*xPts'] = 0 ### ^attAdv is the normalized attAdv ###
 
-players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['defAdv_nxtGWs'] >= 0), 'defAdv*xPts'] = players_df['defAdv_nxtGWs'] * players_df['xPts']
-players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['defAdv_nxtGWs'] < 0), 'defAdv*xPts'] = players_df['defAdv_nxtGWs'] / players_df['xPts']
+players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['defAdv_nxtGWs'] >= 0), '^defAdv*xPts'] = (players_df['defAdv_nxtGWs'] / 9) * players_df['xPts']
+players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['defAdv_nxtGWs'] < 0), '^defAdv*xPts'] = (players_df['defAdv_nxtGWs'] / 9) / players_df['xPts']
 
-players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['attAdv_nxtGWs'] >= 0), 'attAdv*xPts'] = players_df['attAdv_nxtGWs'] * players_df['xPts']
-players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['attAdv_nxtGWs'] < 0), 'attAdv*xPts'] = players_df['attAdv_nxtGWs'] / players_df['xPts']
+players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['attAdv_nxtGWs'] >= 0), '^attAdv*xPts'] = (players_df['attAdv_nxtGWs'] / 9) * players_df['xPts']
+players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['attAdv_nxtGWs'] < 0), '^attAdv*xPts'] = (players_df['attAdv_nxtGWs'] / 9) / players_df['xPts']
 
-players_df['avgAdv*xPts'] = (players_df['fplAdv*xPts'] + players_df['defAdv*xPts'] + players_df['attAdv*xPts']) / 2
+players_df['^avgAdv*xPts'] = (players_df['^fplAdv*xPts'] + players_df['^defAdv*xPts'] + players_df['^attAdv*xPts']) / 2 ### ^avgAdv is the normalized avgAdv ###
 
 
 
@@ -364,7 +364,7 @@ avg_teams_advanced_stats_df.insert(5, 'avg_def_pts/match', def_teams_stats_df['a
 avg_teams_advanced_stats_df.insert(6, 'avg_(att-def)_pts/match', avg_teams_advanced_stats_df['avg_att_pts/match'] - avg_teams_advanced_stats_df['avg_def_pts/match'])
 avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] = avg_teams_advanced_stats_df['attAdv_nxtGWs'] - avg_teams_advanced_stats_df['defAdv_nxtGWs']
 avg_teams_advanced_stats_df['#OfMatches_nxtGWs'] = avg_teams_advanced_stats_df['team'].map(teams_nxtGWsNberOfMatches_dict)
-avg_teams_advanced_stats_df['delta/#OfMatches_nxtGWs'] = round(avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] / avg_teams_advanced_stats_df['#OfMatches_nxtGWs'], 2)
+avg_teams_advanced_stats_df['delta/#OfMatches_nxtGWs'] = round(avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] / avg_teams_advanced_stats_df['#OfMatches_nxtGWs'], 3)
 
 avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['delta/#OfMatches_nxtGWs', 'diff=(def-att)_rank', 'avg_(att-def)_pts/match'], ascending=[True, True, True]) ### IS THE SORTING ORDER THE BEST? I THINK SO!!! IF NOT, INTERCHANGE 'diff...' AND 'avg_(att-def)...' ###
 
@@ -395,10 +395,10 @@ print("\n\n\n")
 teams_top_fpl_players_dict = {}
 teams_top_fpl_players_df = pd.DataFrame()
 for team in fpl_teams_stats_df.index:
-    team_top_fpl_players = players_df.loc[players_df['team'] == team, ['position','team','web_name','tot_pts','fplAdv_nxtGWs','xPts','fplAdv*xPts']].head(7).sort_values(['xPts','tot_pts'], ascending=[False,False]).head(5)   # prime nbers: 11 (max # of players from the same team in a real match) ==> [7 ==> 5] ==> 3 (max # of players from the same team in an fpl game)
+    team_top_fpl_players = players_df.loc[players_df['team'] == team, ['position','team','web_name','tot_pts','fplAdv_nxtGWs','xPts','^fplAdv*xPts']].head(7).sort_values(['xPts','tot_pts'], ascending=[False,False]).head(5)   # prime nbers: 11 (max # of players from the same team in a real match) ==> [7 ==> 5] ==> 3 (max # of players from the same team in an fpl game)
     team_top_fpl_players = team_top_fpl_players.round(3)
     teams_top_fpl_players_df = pd.concat([teams_top_fpl_players_df, team_top_fpl_players])
-    team_top_fpl_players = [' ==> '.join(i) for i in zip(team_top_fpl_players['web_name'], '(' + team_top_fpl_players['xPts'].map(str) + ', ' + team_top_fpl_players['fplAdv*xPts'].map(str) + ')')]
+    team_top_fpl_players = [' ==> '.join(i) for i in zip(team_top_fpl_players['web_name'], '(' + team_top_fpl_players['xPts'].map(str) + ', ' + team_top_fpl_players['^fplAdv*xPts'].map(str) + ')')]
     teams_top_fpl_players_dict[team] = team_top_fpl_players
 fpl_matrix_df = pd.DataFrame(teams_top_fpl_players_dict).transpose()
 fpl_matrix_df.index.name = 'team'
@@ -413,10 +413,10 @@ teams_top_defensive_players_dict = {}
 teams_top_defensive_players_df = pd.DataFrame() 
 defensive_players = players_df[(players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')] # gkps and defs
 for team in def_teams_stats_df.index:
-    team_top_defensive_players = defensive_players.loc[players_df['team'] == team, ['position','team','web_name','tot_pts','defAdv_nxtGWs','xPts','defAdv*xPts']].head(5).sort_values(['xPts','tot_pts'], ascending=[False,False])   # 5 ≈ 11/2  ###> head(3) is commented coz sometimes a top-3 player is injured (& you need a reserve to fill-in)
+    team_top_defensive_players = defensive_players.loc[players_df['team'] == team, ['position','team','web_name','tot_pts','defAdv_nxtGWs','xPts','^defAdv*xPts']].head(5).sort_values(['xPts','tot_pts'], ascending=[False,False])   # 5 ≈ 11/2  ###> head(3) is commented coz sometimes a top-3 player is injured (& you need a reserve to fill-in)
     team_top_defensive_players = team_top_defensive_players.round(3)
     teams_top_defensive_players_df = pd.concat([teams_top_defensive_players_df, team_top_defensive_players])
-    team_top_defensive_players = [' ==> '.join(i) for i in zip(team_top_defensive_players['web_name'], '(' + team_top_defensive_players['xPts'].map(str) + ', ' + team_top_defensive_players['defAdv*xPts'].map(str) + ')')]
+    team_top_defensive_players = [' ==> '.join(i) for i in zip(team_top_defensive_players['web_name'], '(' + team_top_defensive_players['xPts'].map(str) + ', ' + team_top_defensive_players['^defAdv*xPts'].map(str) + ')')]
     teams_top_defensive_players_dict[team] = team_top_defensive_players
 defensive_matrix_df = pd.DataFrame(teams_top_defensive_players_dict).transpose()
 defensive_matrix_df.index.name = 'team'
@@ -431,10 +431,10 @@ teams_top_attacking_players_dict = {}
 teams_top_attacking_players_df = pd.DataFrame() 
 attacking_players = players_df[(players_df['position'] == 'MID') | (players_df['position'] == 'FWD')] # mids and fwds
 for team in att_teams_stats_df.index:
-    team_top_attacking_players = attacking_players.loc[players_df['team'] == team, ['position','team','web_name','tot_pts','attAdv_nxtGWs','xPts','attAdv*xPts']].head(5).sort_values(['xPts','tot_pts'], ascending=[False,False])   # 5 ≈ 11/2 ###> head(3) is commented coz sometimes a top 3-player is injured (& you need a reserve to fill-in)
+    team_top_attacking_players = attacking_players.loc[players_df['team'] == team, ['position','team','web_name','tot_pts','attAdv_nxtGWs','xPts','^attAdv*xPts']].head(5).sort_values(['xPts','tot_pts'], ascending=[False,False])   # 5 ≈ 11/2 ###> head(3) is commented coz sometimes a top 3-player is injured (& you need a reserve to fill-in)
     team_top_attacking_players = team_top_attacking_players.round(3)
     teams_top_attacking_players_df = pd.concat([teams_top_attacking_players_df, team_top_attacking_players])
-    team_top_attacking_players = [' ==> '.join(i) for i in zip(team_top_attacking_players['web_name'], '(' + team_top_attacking_players['xPts'].map(str) + ', ' + team_top_attacking_players['attAdv*xPts'].map(str) + ')')]
+    team_top_attacking_players = [' ==> '.join(i) for i in zip(team_top_attacking_players['web_name'], '(' + team_top_attacking_players['xPts'].map(str) + ', ' + team_top_attacking_players['^attAdv*xPts'].map(str) + ')')]
     teams_top_attacking_players_dict[team] = team_top_attacking_players
 attacking_matrix_df = pd.DataFrame(teams_top_attacking_players_dict).transpose()
 attacking_matrix_df.index.name = 'team'
@@ -453,17 +453,17 @@ teams_top_players_df = pd.DataFrame()
 for team in decision_matrix_df.index:
     nberOfTeamTopAttPlayers = decision_matrix_df.at[team, '#atts']
     nberOfTeamTopDefPlayers = decision_matrix_df.at[team, '#defs']
-    team_top_attacking_players = attacking_players.loc[players_df['team'] == team, ['position','team','web_name','tot_pts','xPts','avgAdv*xPts']].head(5).sort_values(['avgAdv*xPts','xPts','tot_pts'], ascending=[False,False,False]).head(nberOfTeamTopAttPlayers)
-    team_top_defensive_players = defensive_players.loc[players_df['team'] == team, ['position','team','web_name','tot_pts','xPts','avgAdv*xPts']].head(5).sort_values(['avgAdv*xPts','xPts','tot_pts'], ascending=[False,False,False]).head(nberOfTeamTopDefPlayers)
-    team_top_players_for_nxtGWs = pd.concat([team_top_attacking_players, team_top_defensive_players]).sort_values(['avgAdv*xPts', 'xPts','tot_pts'], ascending=[False,False,False])
+    team_top_attacking_players = attacking_players.loc[players_df['team'] == team, ['position','team','web_name','tot_pts','xPts','^avgAdv*xPts']].head(5).sort_values(['^avgAdv*xPts','xPts','tot_pts'], ascending=[False,False,False]).head(nberOfTeamTopAttPlayers)
+    team_top_defensive_players = defensive_players.loc[players_df['team'] == team, ['position','team','web_name','tot_pts','xPts','^avgAdv*xPts']].head(5).sort_values(['^avgAdv*xPts','xPts','tot_pts'], ascending=[False,False,False]).head(nberOfTeamTopDefPlayers)
+    team_top_players_for_nxtGWs = pd.concat([team_top_attacking_players, team_top_defensive_players]).sort_values(['^avgAdv*xPts', 'xPts','tot_pts'], ascending=[False,False,False])
     team_top_players_for_nxtGWs = team_top_players_for_nxtGWs.round(5)
     teams_top_players_df = pd.concat([teams_top_players_df, team_top_players_for_nxtGWs])
-    team_top_players_for_nxtGWs = [' ==> '.join(i) for i in zip(team_top_players_for_nxtGWs['web_name'], '(' + team_top_players_for_nxtGWs['xPts'].map(str) + ', ' + team_top_players_for_nxtGWs['avgAdv*xPts'].map(str) + ')')]
+    team_top_players_for_nxtGWs = [' ==> '.join(i) for i in zip(team_top_players_for_nxtGWs['web_name'], '(' + team_top_players_for_nxtGWs['xPts'].map(str) + ', ' + team_top_players_for_nxtGWs['^avgAdv*xPts'].map(str) + ')')]
     teams_top_players_for_nxtGWs_dict[team] = team_top_players_for_nxtGWs
 teams_top_players_for_nxtGWs_df = pd.DataFrame(teams_top_players_for_nxtGWs_dict).transpose()
 teams_top_players_for_nxtGWs_df.columns = ['Player1', 'Player2','Player3']
 decision_matrix_df = decision_matrix_df.join(teams_top_players_for_nxtGWs_df)
-teams_top_players_df = teams_top_players_df.loc[teams_top_players_df['avgAdv*xPts'] >= 0]
+teams_top_players_df = teams_top_players_df.loc[teams_top_players_df['^avgAdv*xPts'] >= 0]
 teams_top_players_df_dict = teams_top_players_df.to_dict('index')
 
 
@@ -574,24 +574,24 @@ def select_best_team(players, selection_criterion):
 teams_selections_str = ""
 
 print("Selected Team according to FPL advantage:")
-best_team = select_best_team(teams_top_fpl_players_df_dict.values(), 'fplAdv*xPts')
-print(best_team_str(best_team, 'fplAdv*xPts'))
-teams_selections_str += best_team_str(best_team, 'fplAdv*xPts')
+best_team = select_best_team(teams_top_fpl_players_df_dict.values(), '^fplAdv*xPts')
+print(best_team_str(best_team, '^fplAdv*xPts'))
+teams_selections_str += best_team_str(best_team, '^fplAdv*xPts')
 
 print("Selected Team according to DEFensive advantage:")
-best_team = select_best_team(teams_top_defensive_players_df_dict.values(), 'defAdv*xPts')
-print(best_team_str(best_team, 'defAdv*xPts'))
-teams_selections_str += best_team_str(best_team, 'defAdv*xPts')
+best_team = select_best_team(teams_top_defensive_players_df_dict.values(), '^defAdv*xPts')
+print(best_team_str(best_team, '^defAdv*xPts'))
+teams_selections_str += best_team_str(best_team, '^defAdv*xPts')
 
 print("Selected Team according to ATTacking advantage:")
-best_team = select_best_team(teams_top_attacking_players_df_dict.values(), 'attAdv*xPts')
-print(best_team_str(best_team, 'attAdv*xPts'))
-teams_selections_str += best_team_str(best_team, 'attAdv*xPts')
+best_team = select_best_team(teams_top_attacking_players_df_dict.values(), '^attAdv*xPts')
+print(best_team_str(best_team, '^attAdv*xPts'))
+teams_selections_str += best_team_str(best_team, '^attAdv*xPts')
 
 print("Selected Team according to AVeraGe advantage:")
-best_team = select_best_team(teams_top_players_df_dict.values(), 'avgAdv*xPts')
-print(best_team_str(best_team, 'avgAdv*xPts'))
-teams_selections_str += best_team_str(best_team, 'avgAdv*xPts')
+best_team = select_best_team(teams_top_players_df_dict.values(), '^avgAdv*xPts')
+print(best_team_str(best_team, '^avgAdv*xPts'))
+teams_selections_str += best_team_str(best_team, '^avgAdv*xPts')
 ######################################################################################################################################################################################################################################################################################################################################
 
 
