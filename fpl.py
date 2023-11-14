@@ -346,7 +346,7 @@ avg_teams_stats_df = avg_teams_stats_df.set_index('team')
 
 avg_teams_stats_df['avgAdv_nxtGWs'] = round((avg_teams_stats_df['defAdv_nxtGWs'] +
                                                  avg_teams_stats_df['fplAdv_nxtGWs'] + 
-                                                 avg_teams_stats_df['attAdv_nxtGWs'])/3, 2)
+                                                 avg_teams_stats_df['attAdv_nxtGWs'])/3, 3)
 
 avg_teams_stats_df = avg_teams_stats_df.sort_values(['avgAdv_nxtGWs','fplAdv_nxtGWs','fpl_rank'], ascending=[False,False,True]).reset_index(drop=False).drop(columns=['fpl_rank'])
 
@@ -364,7 +364,7 @@ avg_teams_advanced_stats_df.insert(5, 'avg_def_pts/match', def_teams_stats_df['a
 avg_teams_advanced_stats_df.insert(6, 'avg_(att-def)_pts/match', avg_teams_advanced_stats_df['avg_att_pts/match'] - avg_teams_advanced_stats_df['avg_def_pts/match'])
 avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] = avg_teams_advanced_stats_df['attAdv_nxtGWs'] - avg_teams_advanced_stats_df['defAdv_nxtGWs']
 avg_teams_advanced_stats_df['#OfMatches_nxtGWs'] = avg_teams_advanced_stats_df['team'].map(teams_nxtGWsNberOfMatches_dict)
-avg_teams_advanced_stats_df['delta/#OfMatches_nxtGWs'] = round(avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] / avg_teams_advanced_stats_df['#OfMatches_nxtGWs'], 2)
+avg_teams_advanced_stats_df['delta/#OfMatches_nxtGWs'] = round(avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] / avg_teams_advanced_stats_df['#OfMatches_nxtGWs'], 3)
 
 avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['delta/#OfMatches_nxtGWs', 'diff=(def-att)_rank', 'avg_(att-def)_pts/match'], ascending=[True, True, True]) ### IS THE SORTING ORDER THE BEST? I THINK SO!!! IF NOT, INTERCHANGE 'diff...' AND 'avg_(att-def)...' ###
 
