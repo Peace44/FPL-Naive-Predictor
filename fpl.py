@@ -194,7 +194,7 @@ fpl_teams_stats_df = fpl_teams_stats_df.set_index('team', drop=False)
 def_df = fpl_teams_stats_df[['avg_GF/match', 'avg_def_pts/match']]
 att_df = fpl_teams_stats_df[['avg_att_pts/match', 'avg_GF/match']]
 
-def_df.insert(2, 'avg_CS/match-log(avg_GA/match,MP)', fpl_teams_stats_df['avg_CS/match'] - (np.log(fpl_teams_stats_df['avg_GA/match'])/np.log(fpl_teams_stats_df['matches_played'])))
+def_df.insert(2, 'avg_CS/match-log(avg_GA/match,MP)', round(fpl_teams_stats_df['avg_CS/match'] - (np.log(fpl_teams_stats_df['avg_GA/match'])/np.log(fpl_teams_stats_df['matches_played'])), 5))
 att_df.insert(0, 'avg_CS/match-log(avg_GA/match,MP)', def_df['avg_CS/match-log(avg_GA/match,MP)'])
 
 def_teams_stats_df = def_df.sort_values(['avg_CS/match-log(avg_GA/match,MP)', 'avg_def_pts/match', 'avg_GF/match'], ascending=[False,False,False]).reset_index(drop=False)
@@ -300,8 +300,8 @@ att_teams_stats_df = att_teams_stats_df.sort_values(['attAdv_nxtGWs','att_rank']
 players_df.loc[(players_df['pts/game'] <= 0) | (players_df['form'] <= 0) | (players_df['xPts'] < 0), 'xPts'] = 0
 
 players_df['fplAdv_nxtGWs'] = players_df['team'].map(fpl_teamsAdv_dict)
-players_df.loc[players_df['fplAdv_nxtGWs'] >= 0, '^fplAdv*xPts'] = (players_df['fplAdv_nxtGWs'] / 9) * players_df['xPts'] ### ^fplAdv is the normalized fplAdv ###
-players_df.loc[players_df['fplAdv_nxtGWs'] < 0, '^fplAdv*xPts'] = (players_df['fplAdv_nxtGWs'] / 9) / players_df['xPts'] 
+players_df.loc[players_df['fplAdv_nxtGWs'] >= -9, '^fplAdv*xPts'] = ((9 + players_df['fplAdv_nxtGWs']) / 18) * players_df['xPts'] ### ^fplAdv is the normalized fplAdv ###
+players_df.loc[players_df['fplAdv_nxtGWs'] <= -9, '^fplAdv*xPts'] = ((9 + players_df['fplAdv_nxtGWs']) / 18) / players_df['xPts'] ### It's not recommended to choose in your fpl team players with fplAdv_nxtGWs <= -9 ==> So, let me not loose time with them!!! ### Let's stay in the linear region!
 
 players_df['defAdv_nxtGWs'] = players_df['team'].map(def_teamsAdv_dict)
 players_df['^defAdv*xPts'] = 0 ### ^defAdv is the normalized defAdv ###
@@ -309,11 +309,11 @@ players_df['^defAdv*xPts'] = 0 ### ^defAdv is the normalized defAdv ###
 players_df['attAdv_nxtGWs'] = players_df['team'].map(att_teamsAdv_dict)
 players_df['^attAdv*xPts'] = 0 ### ^attAdv is the normalized attAdv ###
 
-players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['defAdv_nxtGWs'] >= 0), '^defAdv*xPts'] = (players_df['defAdv_nxtGWs'] / 9) * players_df['xPts']
-players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['defAdv_nxtGWs'] < 0), '^defAdv*xPts'] = (players_df['defAdv_nxtGWs'] / 9) / players_df['xPts']
+players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['defAdv_nxtGWs'] >= -9), '^defAdv*xPts'] = ((9 + players_df['defAdv_nxtGWs']) / 18) * players_df['xPts']
+players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['defAdv_nxtGWs'] <= -9), '^defAdv*xPts'] = ((9 + players_df['defAdv_nxtGWs']) / 18) / players_df['xPts'] ### It's not recommended to choose in your fpl team players with defAdv_nxtGWs <= -9 ==> So, let me not loose time with them!!! ### Let's stay in the linear region!
 
-players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['attAdv_nxtGWs'] >= 0), '^attAdv*xPts'] = (players_df['attAdv_nxtGWs'] / 9) * players_df['xPts']
-players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['attAdv_nxtGWs'] < 0), '^attAdv*xPts'] = (players_df['attAdv_nxtGWs'] / 9) / players_df['xPts']
+players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['attAdv_nxtGWs'] >= -9), '^attAdv*xPts'] = ((9 + players_df['attAdv_nxtGWs']) / 18) * players_df['xPts']
+players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['attAdv_nxtGWs'] <= -9), '^attAdv*xPts'] = ((9 + players_df['attAdv_nxtGWs']) / 18) / players_df['xPts'] ### It's not recommended to choose in your fpl team players with attAdv_nxtGWs <= -9 ==> So, let me not loose time with them!!! ### Let's stay in the linear region!
 
 players_df['^avgAdv*xPts'] = (players_df['^fplAdv*xPts'] + players_df['^defAdv*xPts'] + players_df['^attAdv*xPts']) / 2 ### ^avgAdv is the normalized avgAdv ###
 
