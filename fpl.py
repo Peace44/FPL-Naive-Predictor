@@ -146,7 +146,7 @@ for player in players:
     player_dict['web_name'] = player['web_name'] + f" ({player_dict['position']}, {player_dict['prvGWsPtsTrend']})"
     player_dict['pts/game'] = float64(player['points_per_game'])
     player_dict['form'] = float64(player['form'])
-    player_dict['xPts'] = round((1/3)*player_dict['form'] + (2/3)*player_dict['pts/game'], 3)   # [2/3 and 1/3 approximate f and (1-f) to 1 decimal ==> f = (g-1) and g = golden_ratio ~ 0.618]
+    player_dict['xPts'] = round((1/3)*player_dict['form'] + (2/3)*player_dict['pts/game'], 5)   # [2/3 and 1/3 approximate f and (1-f) to 1 decimal ==> f = (g-1) and g = golden_ratio ~ 0.618]
     players_stats.append(player_dict)
 
 players_df = pd.DataFrame(players_stats).set_index('id', drop=False)
@@ -246,6 +246,13 @@ fpl_teamsAdv_dict = {}
 def_teamsAdv_dict = {}
 att_teamsAdv_dict = {}
 teams_nxtGWsNberOfMatches_dict = {}
+
+players_df.loc[(players_df['pts/game'] <= 0) | (players_df['form'] <= 0) | (players_df['xPts'] < 0), 'xPts'] = 0
+players_df['^fplAdv*xPts'] = 0 ### ^fplAdv is the normalized fplAdv (to [0,1]) ###
+players_df['^defAdv*xPts'] = 0 ### ^defAdv is the normalized defAdv (to [0,1]) ###
+players_df['^attAdv*xPts'] = 0 ### ^attAdv is the normalized attAdv (to [0,1]) ###
+players_df['^avgAdv*xPts'] = 0 ### ^avgAdv is the normalized avgAdv (to [0,1]) ###
+
 for fixture in upcoming_fixtures_data:
     if fixture["event"] in gws:
         fixture_dict = {}
@@ -265,15 +272,26 @@ for fixture in upcoming_fixtures_data:
         fixture_dict['away_attAdv'] = -fixture_dict['home_defAdv']
         
         nxtGWs_fixtures.append(fixture_dict)
-        
-        fpl_teamsAdv_dict[home_team] = fpl_teamsAdv_dict.get(home_team, 0) + fixture_dict['home_fplAdv']
-        fpl_teamsAdv_dict[away_team] = fpl_teamsAdv_dict.get(away_team, 0) + fixture_dict['away_fplAdv']
 
+        #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+        fpl_teamsAdv_dict[home_team] = fpl_teamsAdv_dict.get(home_team, 0) + fixture_dict['home_fplAdv']
+        fpl_teamsAdv_dict[away_team] = fpl_teamsAdv_dict.get(away_team, 0) + fixture_dict['away_fplAdv']        
+        
+        players_df.loc[players_df['team'] == home_team, '^fplAdv*xPts'] += ((9 + fixture_dict['home_fplAdv']) / 18) * players_df['xPts']
+        players_df.loc[players_df['team'] == away_team, '^fplAdv*xPts'] += ((9 + fixture_dict['away_fplAdv']) / 18) * players_df['xPts']
+        #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
         def_teamsAdv_dict[home_team] = def_teamsAdv_dict.get(home_team, 0) + fixture_dict['home_defAdv']
         def_teamsAdv_dict[away_team] = def_teamsAdv_dict.get(away_team, 0) + fixture_dict['away_defAdv']
-
+        
+        players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['team'] == home_team), '^defAdv*xPts'] += ((9 + fixture_dict['home_defAdv']) / 18) * players_df['xPts']
+        players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['team'] == away_team), '^defAdv*xPts'] += ((9 + fixture_dict['away_defAdv']) / 18) * players_df['xPts']
+        #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
         att_teamsAdv_dict[home_team] = att_teamsAdv_dict.get(home_team, 0) + fixture_dict['home_attAdv']
         att_teamsAdv_dict[away_team] = att_teamsAdv_dict.get(away_team, 0) + fixture_dict['away_attAdv']
+        
+        players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['team'] >= home_team), '^attAdv*xPts'] += ((9 + fixture_dict['home_attAdv']) / 18) * players_df['xPts']
+        players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['team'] >= home_team), '^attAdv*xPts'] += ((9 + fixture_dict['home_attAdv']) / 18) * players_df['xPts']
+        #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
         teams_nxtGWsNberOfMatches_dict[home_team] = teams_nxtGWsNberOfMatches_dict.get(home_team, 0) + 1
         teams_nxtGWsNberOfMatches_dict[away_team] = teams_nxtGWsNberOfMatches_dict.get(away_team, 0) + 1
@@ -281,41 +299,28 @@ for fixture in upcoming_fixtures_data:
 
 
 nxtGWs_fixtures_df = pd.DataFrame(nxtGWs_fixtures)
+players_df['^avgAdv*xPts'] = (players_df['^fplAdv*xPts'] + players_df['^defAdv*xPts'] + players_df['^attAdv*xPts']) / 2
 
 
 
 fpl_teams_stats_df = fpl_teams_stats_df[['fpl_rank','fpl_tier','team', 'form', 'avg_pts/match', 'xPts']] ###> comment this line to make fpl_teams_stats_df more detailed!
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 fpl_teams_stats_df['fplAdv_nxtGWs'] = fpl_teams_stats_df['team'].map(fpl_teamsAdv_dict)
 fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['fplAdv_nxtGWs','fpl_rank'], ascending=[False,True])
 
+players_df['fplAdv_nxtGWs'] = players_df['team'].map(fpl_teamsAdv_dict)
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def_teams_stats_df['defAdv_nxtGWs'] = def_teams_stats_df['team'].map(def_teamsAdv_dict)
 def_teams_stats_df = def_teams_stats_df.sort_values(['defAdv_nxtGWs','def_rank'], ascending=[False,True])
 
+players_df['defAdv_nxtGWs'] = players_df['team'].map(def_teamsAdv_dict)
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 att_teams_stats_df['attAdv_nxtGWs'] = att_teams_stats_df['team'].map(att_teamsAdv_dict)
 att_teams_stats_df = att_teams_stats_df.sort_values(['attAdv_nxtGWs','att_rank'], ascending=[False,True])
 
-
-
-players_df.loc[(players_df['pts/game'] <= 0) | (players_df['form'] <= 0) | (players_df['xPts'] < 0), 'xPts'] = 0
-
-players_df['fplAdv_nxtGWs'] = players_df['team'].map(fpl_teamsAdv_dict)
-players_df.loc[players_df['fplAdv_nxtGWs'] >= -9, '^fplAdv*xPts'] = ((9 + players_df['fplAdv_nxtGWs']) / 18) * players_df['xPts'] ### ^fplAdv is the normalized fplAdv ###
-players_df.loc[players_df['fplAdv_nxtGWs'] <= -9, '^fplAdv*xPts'] = ((9 + players_df['fplAdv_nxtGWs']) / 18) / players_df['xPts'] ### It's not recommended to choose in your fpl team players with fplAdv_nxtGWs <= -9 ==> So, let me not loose time with them!!! ### Let's stay in the linear region!
-
-players_df['defAdv_nxtGWs'] = players_df['team'].map(def_teamsAdv_dict)
-players_df['^defAdv*xPts'] = 0 ### ^defAdv is the normalized defAdv ###
-
 players_df['attAdv_nxtGWs'] = players_df['team'].map(att_teamsAdv_dict)
-players_df['^attAdv*xPts'] = 0 ### ^attAdv is the normalized attAdv ###
-
-players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['defAdv_nxtGWs'] >= -9), '^defAdv*xPts'] = ((9 + players_df['defAdv_nxtGWs']) / 18) * players_df['xPts']
-players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['defAdv_nxtGWs'] <= -9), '^defAdv*xPts'] = ((9 + players_df['defAdv_nxtGWs']) / 18) / players_df['xPts'] ### It's not recommended to choose in your fpl team players with defAdv_nxtGWs <= -9 ==> So, let me not loose time with them!!! ### Let's stay in the linear region!
-
-players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['attAdv_nxtGWs'] >= -9), '^attAdv*xPts'] = ((9 + players_df['attAdv_nxtGWs']) / 18) * players_df['xPts']
-players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['attAdv_nxtGWs'] <= -9), '^attAdv*xPts'] = ((9 + players_df['attAdv_nxtGWs']) / 18) / players_df['xPts'] ### It's not recommended to choose in your fpl team players with attAdv_nxtGWs <= -9 ==> So, let me not loose time with them!!! ### Let's stay in the linear region!
-
-players_df['^avgAdv*xPts'] = (players_df['^fplAdv*xPts'] + players_df['^defAdv*xPts'] + players_df['^attAdv*xPts']) / 2 ### ^avgAdv is the normalized avgAdv ###
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
 
@@ -328,8 +333,30 @@ print(def_teams_stats_df.to_string(index=False))
 print("\n\n\n")
 print(att_teams_stats_df.to_string(index=False))
 print("\n\n\n")
-# print(players_df.loc[players_df['team'] == 'LIV'].head(31).to_string(index=False))
-# print("\n\n\n")
+######################################################################################################################################################################################################################################################################################################################################
+
+
+
+######################################################################################################################################################################################################################################################################################################################################<
+#players_df.loc[(players_df['pts/game'] <= 0) | (players_df['form'] <= 0) | (players_df['xPts'] < 0), 'xPts'] = 0
+
+#players_df['fplAdv_nxtGWs'] = players_df['team'].map(fpl_teamsAdv_dict)
+#players_df.loc[players_df['fplAdv_nxtGWs'] >= -9, '^fplAdv*xPts'] = ((9 + players_df['fplAdv_nxtGWs']) / 18) * players_df['xPts'] ### ^fplAdv is the normalized fplAdv ###
+#players_df.loc[players_df['fplAdv_nxtGWs'] <= -9, '^fplAdv*xPts'] = ((9 + players_df['fplAdv_nxtGWs']) / 18) / players_df['xPts'] ### It's not recommended to choose in your fpl team players with fplAdv_nxtGWs <= -9 ==> So, let me not loose time with them!!! ### Let's stay in the linear region!
+
+#players_df['defAdv_nxtGWs'] = players_df['team'].map(def_teamsAdv_dict)
+#players_df['^defAdv*xPts'] = 0 ### ^defAdv is the normalized defAdv ###
+
+#players_df['attAdv_nxtGWs'] = players_df['team'].map(att_teamsAdv_dict)
+#players_df['^attAdv*xPts'] = 0 ### ^attAdv is the normalized attAdv ###
+
+#players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['defAdv_nxtGWs'] >= -9), '^defAdv*xPts'] = ((9 + players_df['defAdv_nxtGWs']) / 18) * players_df['xPts']
+#players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['defAdv_nxtGWs'] <= -9), '^defAdv*xPts'] = ((9 + players_df['defAdv_nxtGWs']) / 18) / players_df['xPts'] ### It's not recommended to choose in your fpl team players with defAdv_nxtGWs <= -9 ==> So, let me not loose time with them!!! ### Let's stay in the linear region!
+
+#players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['attAdv_nxtGWs'] >= -9), '^attAdv*xPts'] = ((9 + players_df['attAdv_nxtGWs']) / 18) * players_df['xPts']
+#players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['attAdv_nxtGWs'] <= -9), '^attAdv*xPts'] = ((9 + players_df['attAdv_nxtGWs']) / 18) / players_df['xPts'] ### It's not recommended to choose in your fpl team players with attAdv_nxtGWs <= -9 ==> So, let me not loose time with them!!! ### Let's stay in the linear region!
+
+#players_df['^avgAdv*xPts'] = (players_df['^fplAdv*xPts'] + players_df['^defAdv*xPts'] + players_df['^attAdv*xPts']) / 2 ### ^avgAdv is the normalized avgAdv ###
 ######################################################################################################################################################################################################################################################################################################################################
 
 
@@ -364,7 +391,7 @@ avg_teams_advanced_stats_df.insert(5, 'avg_def_pts/match', def_teams_stats_df['a
 avg_teams_advanced_stats_df.insert(6, 'avg_(att-def)_pts/match', avg_teams_advanced_stats_df['avg_att_pts/match'] - avg_teams_advanced_stats_df['avg_def_pts/match'])
 avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] = avg_teams_advanced_stats_df['attAdv_nxtGWs'] - avg_teams_advanced_stats_df['defAdv_nxtGWs']
 avg_teams_advanced_stats_df['#OfMatches_nxtGWs'] = avg_teams_advanced_stats_df['team'].map(teams_nxtGWsNberOfMatches_dict)
-avg_teams_advanced_stats_df['delta/#OfMatches_nxtGWs'] = round(avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] / avg_teams_advanced_stats_df['#OfMatches_nxtGWs'], 3)
+avg_teams_advanced_stats_df['delta/#OfMatches_nxtGWs'] = round(avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] / avg_teams_advanced_stats_df['#OfMatches_nxtGWs'], 5)
 
 avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['delta/#OfMatches_nxtGWs', 'diff=(def-att)_rank', 'avg_(att-def)_pts/match'], ascending=[True, True, True]) ### IS THE SORTING ORDER THE BEST? I THINK SO!!! IF NOT, INTERCHANGE 'diff...' AND 'avg_(att-def)...' ###
 
@@ -374,7 +401,7 @@ avg_teams_advanced_stats_df['#defs'] = 3 - avg_teams_advanced_stats_df['#atts']
 
 
 players_df['#OfMatches_nxtGWs'] = players_df['team'].map(teams_nxtGWsNberOfMatches_dict)
-players_df['tot_xPts'] = round(players_df['#OfMatches_nxtGWs'] * players_df['xPts'], 3)
+players_df['tot_xPts'] = round(players_df['#OfMatches_nxtGWs'] * players_df['xPts'], 5)
 for gw in gws:
     players_df["gw" + str(gw) + "Pts"] = 0
 players_df['tot_aPts'] = 0
@@ -551,7 +578,7 @@ def select_best_team(players, selection_criterion):
             best_points = criterion_points
             best_formation = formation
 
-    print("\nTotal " + selection_criterion + ": " + str(best_points))
+    print("\nTotal " + selection_criterion + ": " + f"{best_points:.5f}") 
     
     # Select the team based on the best formation
     best_team = (
