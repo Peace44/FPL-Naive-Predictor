@@ -315,11 +315,13 @@ def_teams_stats_df['defAdv_nxtGWs'] = def_teams_stats_df['team'].map(def_teamsAd
 def_teams_stats_df = def_teams_stats_df.sort_values(['defAdv_nxtGWs','def_rank'], ascending=[False,True])
 
 players_df['defAdv_nxtGWs'] = players_df['team'].map(def_teamsAdv_dict)
+players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')), 'defAdv_nxtGWs'] = 0
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 att_teams_stats_df['attAdv_nxtGWs'] = att_teams_stats_df['team'].map(att_teamsAdv_dict)
 att_teams_stats_df = att_teams_stats_df.sort_values(['attAdv_nxtGWs','att_rank'], ascending=[False,True])
 
 players_df['attAdv_nxtGWs'] = players_df['team'].map(att_teamsAdv_dict)
+players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')), 'attAdv_nxtGWs'] = 0
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
@@ -631,4 +633,4 @@ if input(f"Do you wish to save the results of this fpl simulation/analysis insid
 
 
 print("\n\n\n")
-######################################################################################################################################################################################################################################################################################################################################N
+######################################################################################################################################################################################################################################################################################################################################
