@@ -146,7 +146,8 @@ for player in players:
     player_dict['web_name'] = player['web_name'] + f" ({player_dict['position']}, {player_dict['prvGWsPtsTrend']})"
     player_dict['pts/game'] = float64(player['points_per_game'])
     player_dict['form'] = float64(player['form'])
-    player_dict['xPts'] = round((1/3)*player_dict['form'] + (2/3)*player_dict['pts/game'], 5)   # [2/3 and 1/3 approximate f and (1-f) to 1 decimal ==> f = (g-1) and g = golden_ratio ~ 0.618]
+    # player_dict['xPts'] = round((1/3)*player_dict['form'] + (2/3)*player_dict['pts/game'], 5)   # [2/3 and 1/3 approximate f and (1-f) to 1 decimal ==> f = (g-1) and g = golden_ratio ~ 0.618]
+    player_dict['xPts'] = round((1/2)*player_dict['form'] + (1/2)*player_dict['pts/game'], 5)
     players_stats.append(player_dict)
 
 players_df = pd.DataFrame(players_stats).set_index('id', drop=False)
@@ -170,7 +171,8 @@ fpl_teams_stats_df['matches_played'] = fpl_teams_stats_df['team'].map(matches_pl
 fpl_teams_stats_df['avg_att_pts/match'] = round(fpl_teams_stats_df['tot_att_pts'] / fpl_teams_stats_df['matches_played'], 5)
 fpl_teams_stats_df['avg_def_pts/match'] = round(fpl_teams_stats_df['tot_def_pts'] / fpl_teams_stats_df['matches_played'], 5)
 fpl_teams_stats_df['avg_pts/match'] = round(fpl_teams_stats_df['tot_pts'] / fpl_teams_stats_df['matches_played'], 5)
-fpl_teams_stats_df['xPts'] = round((1/5)*fpl_teams_stats_df['form'] + (4/5)*fpl_teams_stats_df['avg_pts/match'], 5)   # [1/5 and 4/5 approximate h = (2f - f^2) and (1-h) to 1 decimal ==> ... and h ~ 0.8541]
+# fpl_teams_stats_df['xPts'] = round((1/5)*fpl_teams_stats_df['form'] + (4/5)*fpl_teams_stats_df['avg_pts/match'], 5)   # [1/5 and 4/5 approximate h = (2f - f^2) and (1-h) to 1 decimal ==> ... and h ~ 0.8541]
+fpl_teams_stats_df['xPts'] = round((1/3)*fpl_teams_stats_df['form'] + (2/3)*fpl_teams_stats_df['avg_pts/match'], 5)
 fpl_teams_stats_df['goals_for'] = fpl_teams_stats_df['team'].map(goals_for_dict)
 fpl_teams_stats_df['goals_against'] = fpl_teams_stats_df['team'].map(goals_against_dict)
 fpl_teams_stats_df['clean_sheets'] = fpl_teams_stats_df['team'].map(clean_sheets_dict)
