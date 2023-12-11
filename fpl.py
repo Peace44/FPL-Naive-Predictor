@@ -164,6 +164,7 @@ fpl_teams_stats_df = players_df.groupby('team').sum(numeric_only=True).reset_ind
 defensive_players = players_df[(players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')] # gkps and defs
 attacking_players = players_df[(players_df['position'] == 'MID') | (players_df['position'] == 'FWD')] # mids and fwds
 
+
 fpl_teams_stats_df.insert(1, 'tot_att_pts', attacking_players.groupby('team').sum(numeric_only=True).reset_index()['tot_pts'])
 fpl_teams_stats_df.insert(2, 'tot_def_pts', defensive_players.groupby('team').sum(numeric_only=True).reset_index()['tot_pts'])
 
@@ -172,7 +173,7 @@ fpl_teams_stats_df['avg_att_pts/match'] = round(fpl_teams_stats_df['tot_att_pts'
 fpl_teams_stats_df['avg_def_pts/match'] = round(fpl_teams_stats_df['tot_def_pts'] / fpl_teams_stats_df['matches_played'], 5)
 fpl_teams_stats_df['avg_pts/match'] = round(fpl_teams_stats_df['tot_pts'] / fpl_teams_stats_df['matches_played'], 5)
 # fpl_teams_stats_df['xPts'] = round((1/5)*fpl_teams_stats_df['form'] + (4/5)*fpl_teams_stats_df['avg_pts/match'], 5)   # [1/5 and 4/5 approximate h = (2f - f^2) and (1-h) to 1 decimal ==> ... and h ~ 0.8541]
-fpl_teams_stats_df['xPts'] = round((1/3)*fpl_teams_stats_df['form'] + (2/3)*fpl_teams_stats_df['avg_pts/match'], 5)
+fpl_teams_stats_df['xPts'] = round((1/2)*fpl_teams_stats_df['form'] + (1/2)*fpl_teams_stats_df['avg_pts/match'], 5)
 fpl_teams_stats_df['goals_for'] = fpl_teams_stats_df['team'].map(goals_for_dict)
 fpl_teams_stats_df['goals_against'] = fpl_teams_stats_df['team'].map(goals_against_dict)
 fpl_teams_stats_df['clean_sheets'] = fpl_teams_stats_df['team'].map(clean_sheets_dict)
