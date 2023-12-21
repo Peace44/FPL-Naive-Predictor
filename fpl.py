@@ -147,11 +147,11 @@ for player in players:
     player_dict['pts/game'] = float64(player['points_per_game'])
     player_dict['form'] = float64(player['form'])
     # player_dict['xPts'] = round((1/3)*player_dict['form'] + (2/3)*player_dict['pts/game'], 5)   # [2/3 and 1/3 approximate f and (1-f) to 1 decimal ==> f = (g-1) and g = golden_ratio ~ 0.618]
-    player_dict['xPts'] = round((1/2)*player_dict['form'] + (1/2)*player_dict['pts/game'], 5)
+    player_dict['xPts'] = round((1/2)*player_dict['form'] + (1/2)*player_dict['pts/game'], 5) # for a player form is as important as avg_pts/match, for a team it's the inverse!
     players_stats.append(player_dict)
 
 players_df = pd.DataFrame(players_stats).set_index('id', drop=False)
-players_df = players_df.sort_values(['team', 'xPts', 'form', 'tot_pts'], ascending=[True, False, False, False])
+players_df = players_df.sort_values(['team', 'xPts', 'form', 'tot_pts'], ascending=[True, False, False, False]) # for a player form is as important as avg_pts/game, for a team it's the inverse!
 
 # print(players_df.head(20))
 ######################################################################################################################################################################################################################################################################################################################################
@@ -172,16 +172,16 @@ fpl_teams_stats_df['matches_played'] = fpl_teams_stats_df['team'].map(matches_pl
 # fpl_teams_stats_df['att_xPts'] = round(fpl_teams_stats_df['att_xPts'] / fpl_teams_stats_df['matches_played'], 5)
 # fpl_teams_stats_df['def_xPts'] = round(fpl_teams_stats_df['def_xPts'] / fpl_teams_stats_df['matches_played'], 5)
 fpl_teams_stats_df['avg_pts/match'] = round(fpl_teams_stats_df['tot_pts'] / fpl_teams_stats_df['matches_played'], 5)
-# fpl_teams_stats_df['xPts'] = round((1/5)*fpl_teams_stats_df['form'] + (4/5)*fpl_teams_stats_df['avg_pts/match'], 5)   # [1/5 and 4/5 approximate h = (2f - f^2) and (1-h) to 1 decimal ==> ... and h ~ 0.8541]
-# fpl_teams_stats_df['xPts'] = round((1/2)*fpl_teams_stats_df['form'] + (1/2)*fpl_teams_stats_df['avg_pts/match'], 5)
+# fpl_teams_stats_df['fpl_xPts'] = round((1/5)*fpl_teams_stats_df['form'] + (4/5)*fpl_teams_stats_df['avg_pts/match'], 5)   # [1/5 and 4/5 approximate h = (2f - f^2) and (1-h) to 1 decimal ==> ... and h ~ 0.8541]
+fpl_teams_stats_df['fpl_xPts'] = round((1/3)*fpl_teams_stats_df['form'] + (2/3)*fpl_teams_stats_df['avg_pts/match'], 5) # for a team form is less important than avg_pts/match!
 fpl_teams_stats_df['goals_for'] = fpl_teams_stats_df['team'].map(goals_for_dict)
 fpl_teams_stats_df['goals_against'] = fpl_teams_stats_df['team'].map(goals_against_dict)
 fpl_teams_stats_df['clean_sheets'] = fpl_teams_stats_df['team'].map(clean_sheets_dict)
 fpl_teams_stats_df['avg_GF/match'] = round(fpl_teams_stats_df['goals_for'] / fpl_teams_stats_df['matches_played'], 5)
 fpl_teams_stats_df['avg_GA/match'] = round(fpl_teams_stats_df['goals_against'] / fpl_teams_stats_df['matches_played'], 5)
 fpl_teams_stats_df['avg_CS/match'] = round(fpl_teams_stats_df['clean_sheets'] / fpl_teams_stats_df['matches_played'], 5)
-fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['xPts','avg_pts/match','tot_pts'], ascending=[False,False,False]).reset_index(drop=True)
-fpl_teams_stats_df = fpl_teams_stats_df[['team', 'matches_played', 'avg_GF/match','avg_GA/match','avg_CS/match','att_xPts','def_xPts','avg_pts/match','form', 'xPts']]
+fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['fpl_xPts','avg_pts/match','tot_pts'], ascending=[False,False,False]).reset_index(drop=True) # for a player form is less important than avg_pts/match!
+fpl_teams_stats_df = fpl_teams_stats_df[['team', 'matches_played', 'avg_GF/match','avg_GA/match','avg_CS/match','att_xPts','def_xPts','avg_pts/match','form', 'fpl_xPts']]
 
 fpl_teams_stats_df.insert(0, 'fpl_rank', 1 + fpl_teams_stats_df['team'].index)
 fpl_teams_stats_df.insert(1, 'fpl_tier', 1 + fpl_teams_stats_df['team'].index//2)
@@ -306,7 +306,7 @@ players_df['^avgAdv*xPts'] = round((players_df['^fplAdv*xPts'] + players_df['^de
 
 
 
-fpl_teams_stats_df = fpl_teams_stats_df[['fpl_rank','fpl_tier','team', 'form', 'avg_pts/match', 'xPts']] ###> comment this line to make fpl_teams_stats_df more detailed!
+fpl_teams_stats_df = fpl_teams_stats_df[['fpl_rank','fpl_tier','team', 'form', 'avg_pts/match', 'fpl_xPts']] ###> comment this line to make fpl_teams_stats_df more detailed!
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 fpl_teams_stats_df['fplAdv_nxtGWs'] = fpl_teams_stats_df['team'].map(fpl_teamsAdv_dict)
