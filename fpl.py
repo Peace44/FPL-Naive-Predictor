@@ -151,7 +151,7 @@ for player in players:
     players_stats.append(player_dict)
 
 players_df = pd.DataFrame(players_stats).set_index('id', drop=False)
-players_df = players_df.sort_values(['team', 'xPts', 'form', 'tot_pts'], ascending=[True, False, False, False]) # after 'xPts' there's 'form' because 'form' gives you info on which players might be currently <appearing>/<playing well> or not
+players_df = players_df.sort_values(['team', 'form', 'xPts', 'tot_pts'], ascending=[True, False, False, False]) # 'form' gives you info on which players might be currently <appearing>/<playing well> or not
 
 # print(players_df.head(20))
 # print("\n\n\n")
@@ -203,13 +203,13 @@ fpl_teams_stats_df = fpl_teams_stats_df.set_index('team', drop=False)
 def_df = fpl_teams_stats_df[['avg_GF/match', 'def_xPts']]
 att_df = fpl_teams_stats_df[['avg_GF/match', 'att_xPts']]
 
-def_df.insert(1, 'avg_CS/match-log(avg_GA/match,MP)', round(fpl_teams_stats_df['avg_CS/match'] - (np.log(fpl_teams_stats_df['avg_GA/match'])/np.log(fpl_teams_stats_df['matches_played'])), 5))
+def_df.insert(1, 'avg_CS/match-log(avg_GA/match,MP)', round(fpl_teams_stats_df['avg_CS/match'] - (np.log(fpl_teams_stats_df['avg_GA/match'])/np.log(fpl_teams_stats_df['matches_played'])), 5)) # the composite stat 'avg_CS/match-log(avg_GA/match,MP)' has a better correlation with 'def_xPts' than 'avg_CS/match' or 'avg_GA/match' alone 
 att_df.insert(0, 'avg_CS/match-log(avg_GA/match,MP)', def_df['avg_CS/match-log(avg_GA/match,MP)'])
 
 def_teams_stats_df = def_df.sort_values(['def_xPts', 'avg_CS/match-log(avg_GA/match,MP)', 'avg_GF/match'], ascending=[False,False,False]).reset_index(drop=False)
 att_teams_stats_df = att_df.sort_values(['att_xPts', 'avg_GF/match', 'avg_CS/match-log(avg_GA/match,MP)'], ascending=[False,False,False]).reset_index(drop=False)
 
-# to get a better correlation for the attacking stats, one might use a composite stat made of avg_GF/match + ln(shots on target that didn't result in a goal)/ln(MP)... The problem is where can I find those stats??!
+# to get a better correlation for the attacking stats, one might use a composite stat made of avg_GF/match + log(average per match of shots on target that didn't result in a goal, MP)... The problem is where can I find those stats??!
 
 def_teams_stats_df.insert(0, 'def_rank', 1 + def_teams_stats_df['team'].index)
 def_teams_stats_df.insert(1, 'def_tier', 1 + def_teams_stats_df['team'].index//2)
@@ -234,7 +234,7 @@ print(f"\n\n\nThe next gameweek is GW{nxtGW}\n")
 gws = []
 
 if input(f"Do you want to simulate a particular gameweek?\nAnswer 'no' if you want to simulate in advance many contiguous gameweeks starting from the next.\n[Y/n]?   ").lower()[0] == 'y':
-    gwToSimulate = int(input(f"\nWhich one? Enter a number in the range [{nxtGW}, 38]:    "))
+    gwToSimulate = int(input(f"\nWhich one? Enter a number in the range [1, 38]:    ")) # int(input(f"\nWhich one? Enter a number in the range [{nxtGW}, 38]:    "))
     gws.append(gwToSimulate)
 else:
     nberOfGWsInAdvance = int(input(f"\nHow many gameweeks do you want to simulate in advance (1, 2, 3, or 4)?   "))
@@ -262,7 +262,7 @@ players_df['^defAdv*xPts'] = 0 ### ^defAdv is the normalized defAdv (to [0,1]) #
 players_df['^attAdv*xPts'] = 0 ### ^attAdv is the normalized attAdv (to [0,1]) ###
 players_df['^avgAdv*xPts'] = 0 ### ^avgAdv is the normalized avgAdv (to [0,1]) ###
 
-for fixture in upcoming_fixtures_data:
+for fixture in fixtures_data: # for fixture in upcoming_fixtures_data
     if fixture["event"] in gws:
         fixture_dict = {}
 
