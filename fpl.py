@@ -200,16 +200,14 @@ fpl_teams_stats_df = fpl_teams_stats_df.set_index('team', drop=False)
 
 
 ######################################################################################################################################################################################################################################################################################################################################
-def_df = fpl_teams_stats_df[['avg_GF/match', 'def_xPts']]
-att_df = fpl_teams_stats_df[['avg_GF/match', 'att_xPts']]
+def_df = fpl_teams_stats_df[['def_xPts', 'avg_GA/match']]
+att_df = fpl_teams_stats_df[['att_xPts', 'avg_GF/match']]
 
-def_df.insert(1, 'avg_CS/match-log(avg_GA/match,MP)', round(fpl_teams_stats_df['avg_CS/match'] - (np.log(fpl_teams_stats_df['avg_GA/match'])/np.log(fpl_teams_stats_df['matches_played'])), 5)) # the composite stat 'avg_CS/match-log(avg_GA/match,MP)' has a better correlation with 'def_xPts' than 'avg_CS/match' or 'avg_GA/match' alone 
-att_df.insert(0, 'avg_CS/match-log(avg_GA/match,MP)', def_df['avg_CS/match-log(avg_GA/match,MP)'])
+def_df.insert(2, 'def_xPts / ^avg_GA/match', def_df['def_xPts'] / (def_df['avg_GA/match']/def_df['avg_GA/match'].max()))
+att_df.insert(2, 'att_xPts * ^avg_GF/match', att_df['att_xPts'] * (att_df['avg_GF/match']/att_df['avg_GF/match'].max()))
 
-def_teams_stats_df = def_df.sort_values(['def_xPts', 'avg_CS/match-log(avg_GA/match,MP)', 'avg_GF/match'], ascending=[False,False,False]).reset_index(drop=False)
-att_teams_stats_df = att_df.sort_values(['att_xPts', 'avg_GF/match', 'avg_CS/match-log(avg_GA/match,MP)'], ascending=[False,False,False]).reset_index(drop=False)
-
-# to get a better correlation for the attacking stats, one might use a composite stat made of avg_GF/match + log(average per match of shots on target that didn't result in a goal, MP)... The problem is where can I find those stats??!
+def_teams_stats_df = def_df.sort_values('def_xPts / ^avg_GA/match', ascending=False).reset_index(drop=False)
+att_teams_stats_df = att_df.sort_values('att_xPts * ^avg_GF/match', ascending=False).reset_index(drop=False)
 
 def_teams_stats_df.insert(0, 'def_rank', 1 + def_teams_stats_df['team'].index)
 def_teams_stats_df.insert(1, 'def_tier', 1 + def_teams_stats_df['team'].index//2)
