@@ -203,11 +203,11 @@ fpl_teams_stats_df = fpl_teams_stats_df.set_index('team', drop=False)
 def_df = fpl_teams_stats_df[['def_xPts', 'avg_GA/match']]
 att_df = fpl_teams_stats_df[['att_xPts', 'avg_GF/match']]
 
-def_df.insert(2, 'def_xPts / ^avg_GA/match', def_df['def_xPts'] / (def_df['avg_GA/match']/def_df['avg_GA/match'].max()))
-att_df.insert(2, 'att_xPts * ^avg_GF/match', att_df['att_xPts'] * (att_df['avg_GF/match']/att_df['avg_GF/match'].max()))
+def_df.insert(2, 'def_xPts / ^avg_GA/match', def_df['def_xPts'] * (def_df['avg_GA/match'].min()/def_df['avg_GA/match']))
+att_df.insert(2, 'att_xPts * avg_GF/match^', att_df['att_xPts'] * (att_df['avg_GF/match']/att_df['avg_GF/match'].max()))
 
 def_teams_stats_df = def_df.sort_values('def_xPts / ^avg_GA/match', ascending=False).reset_index(drop=False)
-att_teams_stats_df = att_df.sort_values('att_xPts * ^avg_GF/match', ascending=False).reset_index(drop=False)
+att_teams_stats_df = att_df.sort_values('att_xPts * avg_GF/match^', ascending=False).reset_index(drop=False)
 
 def_teams_stats_df.insert(0, 'def_rank', 1 + def_teams_stats_df['team'].index)
 def_teams_stats_df.insert(1, 'def_tier', 1 + def_teams_stats_df['team'].index//2)
