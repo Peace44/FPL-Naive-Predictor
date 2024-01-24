@@ -146,7 +146,6 @@ for player in players:
     player_dict['web_name'] = player['web_name'] + f" ({player_dict['position']}, {player_dict['prvGWsPtsTrend']})"
     player_dict['pts/game'] = float64(player['points_per_game'])
     player_dict['form'] = float64(player['form'])
-    # player_dict['xPts'] = round((2/3)*player_dict['pts/game'] + (1/3)*player_dict['form'], 5)   # [2/3 and 1/3 approximate f and (1-f) to 1 decimal ==> f = (g-1) and g = golden_ratio ~ 0.618]
     player_dict['xPts'] = round((1/2)*player_dict['pts/game'] + (1/2)*player_dict['form'], 5) # for a player form is as important as pts/game, for a team fpl_pts/match is more important!
     players_stats.append(player_dict)
 
