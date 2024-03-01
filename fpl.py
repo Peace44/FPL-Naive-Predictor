@@ -380,8 +380,14 @@ avg_teams_advanced_stats_df['delta/#OfMatches_nxtGWs'] = round(avg_teams_advance
 
 avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['delta/#OfMatches_nxtGWs', 'diff=(def-att)_rank', 'avg_(att-def)_xPts/match'], ascending=[True, True, True]) ### IS THE SORTING ORDER THE BEST? I THINK SO!!! IF NOT, INTERCHANGE 'diff...' AND 'avg_(att-def)...' ###
 
-avg_teams_advanced_stats_df['#atts'] = pd.DataFrame([i for i in range(0,20)]).index // 5
-avg_teams_advanced_stats_df['#defs'] = 3 - avg_teams_advanced_stats_df['#atts']
+avg_teams_advanced_stats_df['#atts'] = 3
+avg_teams_advanced_stats_df['#defs'] = 0
+
+number_of_playing_teams = avg_teams_advanced_stats_df['#OfMatches_nxtGWs'].notna().sum()
+playing_teams_indices = avg_teams_advanced_stats_df[avg_teams_advanced_stats_df['#OfMatches_nxtGWs'].notna()].index
+divisor = number_of_playing_teams // 4
+avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts'] = [i // divisor for i in range(len(playing_teams_indices))]
+avg_teams_advanced_stats_df.loc[playing_teams_indices, '#defs'] = 3 - avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts']
 
 
 
