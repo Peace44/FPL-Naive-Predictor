@@ -313,18 +313,18 @@ fpl_teams_stats_df = fpl_teams_stats_df[['fpl_rank', 'fpl_tier', 'team', 'fpl_pt
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 fpl_teams_stats_df['fplAdv_nxtGWs'] = fpl_teams_stats_df['team'].map(fpl_teamsAdv_dict)
-fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['fplAdv_nxtGWs','fpl_rank'], ascending=[False,True])
+fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['fplAdv_nxtGWs','fpl_rank'], ascending=[False,True]).dropna(subset=['fplAdv_nxtGWs'])
 
 players_df['fplAdv_nxtGWs'] = players_df['team'].map(fpl_teamsAdv_dict)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def_teams_stats_df['defAdv_nxtGWs'] = def_teams_stats_df['team'].map(def_teamsAdv_dict)
-def_teams_stats_df = def_teams_stats_df.sort_values(['defAdv_nxtGWs','def_rank'], ascending=[False,True])
+def_teams_stats_df = def_teams_stats_df.sort_values(['defAdv_nxtGWs','def_rank'], ascending=[False,True]).dropna(subset=['defAdv_nxtGWs'])
 
 players_df['defAdv_nxtGWs'] = players_df['team'].map(def_teamsAdv_dict)
 players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')), 'defAdv_nxtGWs'] = 0
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 att_teams_stats_df['attAdv_nxtGWs'] = att_teams_stats_df['team'].map(att_teamsAdv_dict)
-att_teams_stats_df = att_teams_stats_df.sort_values(['attAdv_nxtGWs','att_rank'], ascending=[False,True])
+att_teams_stats_df = att_teams_stats_df.sort_values(['attAdv_nxtGWs','att_rank'], ascending=[False,True]).dropna(subset=['attAdv_nxtGWs'])
 
 players_df['attAdv_nxtGWs'] = players_df['team'].map(att_teamsAdv_dict)
 players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')), 'attAdv_nxtGWs'] = 0
@@ -380,14 +380,14 @@ avg_teams_advanced_stats_df['delta/#OfMatches_nxtGWs'] = round(avg_teams_advance
 avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['delta/#OfMatches_nxtGWs', 'diff=(def-att)_rank', 'avg_(att-def)_xPts/match'], ascending=[True, True, True]) ### IS THE SORTING ORDER THE BEST? I THINK SO!!! IF NOT, INTERCHANGE 'diff...' AND 'avg_(att-def)...' ###
 
 ####################################################################################################################################################################################################################################################################################
-avg_teams_advanced_stats_df['#atts'] = 3 ##########################################################################################################################################
-avg_teams_advanced_stats_df['#defs'] = 0 ##########################################################################################################################################
+avg_teams_advanced_stats_df['#atts'] = 0
+avg_teams_advanced_stats_df['#defs'] = 0 
 
-number_of_playing_teams = avg_teams_advanced_stats_df['#OfMatches_nxtGWs'].notna().sum() ##########################################################################################################################################
-playing_teams_indices = avg_teams_advanced_stats_df[avg_teams_advanced_stats_df['#OfMatches_nxtGWs'].notna()].index ##########################################################################################################################################
-divisor = number_of_playing_teams // 4 ##########################################################################################################################################
-avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts'] = [i // divisor for i in range(len(playing_teams_indices))] ##########################################################################################################################################
-avg_teams_advanced_stats_df.loc[playing_teams_indices, '#defs'] = 3 - avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts'] ##########################################################################################################################################
+number_of_playing_teams = avg_teams_advanced_stats_df['#OfMatches_nxtGWs'].notna().sum()
+playing_teams_indices = avg_teams_advanced_stats_df[avg_teams_advanced_stats_df['#OfMatches_nxtGWs'].notna()].index
+divisor = number_of_playing_teams // 4
+avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts'] = [i // divisor for i in range(len(playing_teams_indices))]
+avg_teams_advanced_stats_df.loc[playing_teams_indices, '#defs'] = 3 - avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts']
 ####################################################################################################################################################################################################################################################################################
 
 
