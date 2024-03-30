@@ -315,7 +315,6 @@ fpl_teams_stats_df = fpl_teams_stats_df[['fpl_rank', 'fpl_tier', 'team', 'fpl_pt
 fpl_teams_stats_df['fplAdv_nxtGWs'] = fpl_teams_stats_df['team'].map(fpl_teamsAdv_dict)
 fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['fplAdv_nxtGWs','fpl_rank'], ascending=[False,True]).dropna(subset=['fplAdv_nxtGWs'])
 
-
 players_df['fplAdv_nxtGWs'] = players_df['team'].map(fpl_teamsAdv_dict)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def_teams_stats_df['defAdv_nxtGWs'] = def_teams_stats_df['team'].map(def_teamsAdv_dict)
