@@ -385,8 +385,8 @@ avg_teams_advanced_stats_df['#defs'] = 0
 
 number_of_playing_teams = avg_teams_advanced_stats_df['#OfMatches_nxtGWs'].notna().sum()
 playing_teams_indices = avg_teams_advanced_stats_df[avg_teams_advanced_stats_df['#OfMatches_nxtGWs'].notna()].index
-divisor = number_of_playing_teams // 4
-avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts'] = [i // divisor for i in range(len(playing_teams_indices))]
+divisor = number_of_playing_teams / 4
+avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts'] = [int(i // divisor) for i in range(len(playing_teams_indices))]
 avg_teams_advanced_stats_df.loc[playing_teams_indices, '#defs'] = 3 - avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts']
 ####################################################################################################################################################################################################################################################################################
 
