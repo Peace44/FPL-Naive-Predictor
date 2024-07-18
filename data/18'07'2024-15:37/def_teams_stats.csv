@@ -1,0 +1,21 @@
+def_rank,def_tier,team,def_xPts,avg_GA/match,def_xPts / ^avg_GA/match,defAdv_nxtGWs
+3,2,LIV,,,,13
+4,2,NEW,,,,12
+2,1,MCI,,,,11
+1,1,ARS,,,,10
+5,3,TOT,,,,8
+6,3,CHE,,,,3
+11,6,MUN,,,,3
+8,4,WHU,,,,1
+10,5,CRY,,,,1
+9,5,EVE,,,,0
+12,6,BOU,,,,-1
+16,8,FUL,,,,-1
+17,9,NFO,,,,-2
+7,4,AVL,,,,-3
+13,7,BHA,,,,-3
+14,7,BRE,,,,-7
+18,9,LEI,,,,-7
+19,10,SOU,,,,-9
+15,8,WOL,,,,-12
+20,10,IPS,,,,-17
