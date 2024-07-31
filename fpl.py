@@ -234,8 +234,8 @@ if input(f"Do you want to simulate a particular gameweek?\nAnswer 'no' if you wa
     gwToSimulate = int(input(f"\nWhich one? Enter a number in the range [1, 38]:    ")) # int(input(f"\nWhich one? Enter a number in the range [{nxtGW}, 38]:    "))
     gws.append(gwToSimulate)
 else:
-    nberOfGWsInAdvance = int(input(f"\nHow many gameweeks do you want to simulate in advance (1, 2, 3, or 4)?   "))
-    if nberOfGWsInAdvance not in [1, 2, 3, 4]:
+    nberOfGWsInAdvance = int(input(f"\nHow many gameweeks do you want to simulate in advance ( <= 5 )?   "))
+    if nberOfGWsInAdvance not in range(1, 5+1):
         sys.exit("\n\n\n    !Bye-\n-Bye!\n\n\n")
 
     gws.append(nxtGW) 
@@ -244,8 +244,10 @@ else:
         gws.append(nxtGW + 1)
     if nberOfGWsInAdvance >= 3:
         gws.append(nxtGW + 2)
-    if nberOfGWsInAdvance == 4:
+    if nberOfGWsInAdvance >= 4:
         gws.append(nxtGW + 3)
+    if nberOfGWsInAdvance == 5:
+        gws.append(nxtGW + 4)
 
 nxtGWs_fixtures = []
 fpl_teamsAdv_dict = {}
