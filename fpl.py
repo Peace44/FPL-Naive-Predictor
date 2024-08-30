@@ -199,14 +199,14 @@ fpl_teams_stats_df = fpl_teams_stats_df.set_index('team', drop=False)
 
 
 ######################################################################################################################################################################################################################################################################################################################################
-def_df = fpl_teams_stats_df[['def_xPts', 'avg_GA/match']]
-att_df = fpl_teams_stats_df[['att_xPts', 'avg_GF/match']]
+def_df = fpl_teams_stats_df[['fpl_rank','def_xPts', 'avg_GA/match']]
+att_df = fpl_teams_stats_df[['fpl_rank','att_xPts', 'avg_GF/match']]
 
-def_df.insert(2, 'def_xPts / ^avg_GA/match', round(def_df['def_xPts'] * (def_df['avg_GA/match'].min()/def_df['avg_GA/match']), 5))
-att_df.insert(2, 'att_xPts * ^avg_GF/match', round(att_df['att_xPts'] * (att_df['avg_GF/match']/att_df['avg_GF/match'].max()), 5))
+def_df.insert(3, '^def_xPts/avg_GA/match', round((def_df['def_xPts']/def_df['def_xPts'].max()) / def_df['avg_GA/match'], 5))
+att_df.insert(3, '^att_xPts*avg_GF/match', round((att_df['att_xPts']/att_df['att_xPts'].max()) * att_df['avg_GF/match'], 5))
 
-def_teams_stats_df = def_df.sort_values('def_xPts / ^avg_GA/match', ascending=False).reset_index(drop=False)
-att_teams_stats_df = att_df.sort_values('att_xPts * ^avg_GF/match', ascending=False).reset_index(drop=False)
+def_teams_stats_df = def_df.sort_values(['^def_xPts/avg_GA/match','def_xPts','fpl_rank'], ascending=[False,False,True]).reset_index(drop=False).drop(columns=['fpl_rank'])
+att_teams_stats_df = att_df.sort_values(['^att_xPts*avg_GF/match','att_xPts','fpl_rank'], ascending=[False,False,True]).reset_index(drop=False).drop(columns=['fpl_rank'])
 
 def_teams_stats_df.insert(0, 'def_rank', 1 + def_teams_stats_df['team'].index)
 def_teams_stats_df.insert(1, 'def_tier', 1 + def_teams_stats_df['team'].index//2)
@@ -234,8 +234,8 @@ if input(f"Do you want to simulate a particular gameweek?\nAnswer 'no' if you wa
     gwToSimulate = int(input(f"\nWhich one? Enter a number in the range [1, 38]:    ")) # int(input(f"\nWhich one? Enter a number in the range [{nxtGW}, 38]:    "))
     gws.append(gwToSimulate)
 else:
-    nberOfGWsInAdvance = int(input(f"\nHow many gameweeks do you want to simulate in advance (1, 2, 3, or 4)?   "))
-    if nberOfGWsInAdvance not in [1, 2, 3, 4]:
+    nberOfGWsInAdvance = int(input(f"\nHow many gameweeks do you want to simulate in advance ( <= 5 )?   "))
+    if nberOfGWsInAdvance not in range(1, 5+1):
         sys.exit("\n\n\n    !Bye-\n-Bye!\n\n\n")
 
     gws.append(nxtGW) 
@@ -244,8 +244,10 @@ else:
         gws.append(nxtGW + 1)
     if nberOfGWsInAdvance >= 3:
         gws.append(nxtGW + 2)
-    if nberOfGWsInAdvance == 4:
+    if nberOfGWsInAdvance >= 4:
         gws.append(nxtGW + 3)
+    if nberOfGWsInAdvance == 5:
+        gws.append(nxtGW + 4)
 
 nxtGWs_fixtures = []
 fpl_teamsAdv_dict = {}
@@ -385,8 +387,8 @@ avg_teams_advanced_stats_df['#defs'] = 0
 
 number_of_playing_teams = avg_teams_advanced_stats_df['#OfMatches_nxtGWs'].notna().sum()
 playing_teams_indices = avg_teams_advanced_stats_df[avg_teams_advanced_stats_df['#OfMatches_nxtGWs'].notna()].index
-divisor = number_of_playing_teams // 4
-avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts'] = [i // divisor for i in range(len(playing_teams_indices))]
+divisor = number_of_playing_teams / 4
+avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts'] = [int(i // divisor) for i in range(len(playing_teams_indices))]
 avg_teams_advanced_stats_df.loc[playing_teams_indices, '#defs'] = 3 - avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts']
 ####################################################################################################################################################################################################################################################################################
 
