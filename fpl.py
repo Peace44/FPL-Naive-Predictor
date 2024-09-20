@@ -202,17 +202,17 @@ fpl_teams_stats_df = fpl_teams_stats_df.set_index('team', drop=False)
 def_df = fpl_teams_stats_df[['fpl_rank','def_xPts', 'avg_GA/match']]
 att_df = fpl_teams_stats_df[['fpl_rank','att_xPts', 'avg_GF/match']]
 
-def_df.insert(3, 'Z(def_xPts)', round((def_df['def_xPts'] - def_df['def_xPts'].mean())/def_df['def_xPts'].std(), 7))
-att_df.insert(3, 'Z(att_xPts)', round((att_df['att_xPts'] - att_df['att_xPts'].mean())/att_df['att_xPts'].std(), 7))
+def_df.insert(3, 'Z(def_xPts)', round((def_df['def_xPts'] - def_df['def_xPts'].mean())/def_df['def_xPts'].std(), 7)) ### Z-score of def_xPts
+att_df.insert(3, 'Z(att_xPts)', round((att_df['att_xPts'] - att_df['att_xPts'].mean())/att_df['att_xPts'].std(), 7)) ### Z-score of att_xPts
 
-def_df.insert(4, 'Z(avg_GA/match)', round((def_df['avg_GA/match'] - def_df['avg_GA/match'].mean())/def_df['avg_GA/match'].std(), 7))
-att_df.insert(4, 'Z(avg_GF/match)', round((att_df['avg_GF/match'] - att_df['avg_GF/match'].mean())/att_df['avg_GF/match'].std(), 7))
+def_df.insert(4, 'Z(avg_GA/match)', round((def_df['avg_GA/match'] - def_df['avg_GA/match'].mean())/def_df['avg_GA/match'].std(), 7)) ### Z-score of avg_GA/match
+att_df.insert(4, 'Z(avg_GF/match)', round((att_df['avg_GF/match'] - att_df['avg_GF/match'].mean())/att_df['avg_GF/match'].std(), 7)) ### Z-score of avg_GF/match
 
-def_df.insert(5, '^def_xPts/avg_GA/match', round(.618*def_df['Z(def_xPts)'] - .382*def_df['Z(avg_GA/match)'], 7)) ### change the name of the column!
-att_df.insert(5, '^att_xPts*avg_GF/match', round(.618*att_df['Z(att_xPts)'] + .382*att_df['Z(avg_GF/match)'], 7)) ### change the name of the column!
+def_df.insert(5, 'def_potential', round(.618*def_df['Z(def_xPts)'] - .382*def_df['Z(avg_GA/match)'], 7)) 
+att_df.insert(5, 'att_potential', round(.618*att_df['Z(att_xPts)'] + .382*att_df['Z(avg_GF/match)'], 7))
 
-def_teams_stats_df = def_df.sort_values(['^def_xPts/avg_GA/match','def_xPts','fpl_rank'], ascending=[False,False,True]).reset_index(drop=False).drop(columns=['fpl_rank'])
-att_teams_stats_df = att_df.sort_values(['^att_xPts*avg_GF/match','att_xPts','fpl_rank'], ascending=[False,False,True]).reset_index(drop=False).drop(columns=['fpl_rank'])
+def_teams_stats_df = def_df.sort_values(['def_potential','def_xPts','fpl_rank'], ascending=[False,False,True]).reset_index(drop=False).drop(columns=['fpl_rank', 'Z(def_xPts)', 'Z(avg_GA/match)'])
+att_teams_stats_df = att_df.sort_values(['att_potential','att_xPts','fpl_rank'], ascending=[False,False,True]).reset_index(drop=False).drop(columns=['fpl_rank', 'Z(att_xPts)', 'Z(avg_GF/match)'])
 
 def_teams_stats_df.insert(0, 'def_rank', 1 + def_teams_stats_df['team'].index)
 def_teams_stats_df.insert(1, 'def_tier', 1 + def_teams_stats_df['team'].index//2)
