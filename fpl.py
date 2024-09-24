@@ -183,10 +183,13 @@ fpl_teams_stats_df['avg_GF/match'] = round(fpl_teams_stats_df['goals_for'] / fpl
 fpl_teams_stats_df['goals_against'] = fpl_teams_stats_df['team'].map(goals_against_dict)
 fpl_teams_stats_df['avg_GA/match'] = round(fpl_teams_stats_df['goals_against'] / fpl_teams_stats_df['matches_played'], 7)
 
+fpl_teams_stats_df['goal_diff'] = fpl_teams_stats_df['goals_for'] - fpl_teams_stats_df['goals_against']
+fpl_teams_stats_df['avg_GD/match'] = round(fpl_teams_stats_df['goal_diff'] / fpl_teams_stats_df['matches_played'], 7)
+
 fpl_teams_stats_df['clean_sheets'] = fpl_teams_stats_df['team'].map(clean_sheets_dict)
 fpl_teams_stats_df['avg_CS/match'] = round(fpl_teams_stats_df['clean_sheets'] / fpl_teams_stats_df['matches_played'], 7)
 
-fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['fpl_xPts','fpl_pts/match','fpl_pts'], ascending=[False,False,False]).reset_index(drop=True)
+fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['fpl_xPts','fpl_pts/match','fpl_pts','avg_GD/match','avg_CS/match'], ascending=[False,False,False,False,False]).reset_index(drop=True)
 
 fpl_teams_stats_df.insert(0, 'fpl_rank', 1 + fpl_teams_stats_df['team'].index)
 fpl_teams_stats_df.insert(1, 'fpl_tier', 1 + fpl_teams_stats_df['team'].index//2)
