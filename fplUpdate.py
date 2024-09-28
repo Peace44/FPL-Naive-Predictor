@@ -61,7 +61,7 @@ if update.lower()[0] == 'y':
     for i in range(len(colsToUpdate)):
         players_df[colsToUpdate[i]] = players_df['id'].map(players_aPts_dicts[i])
 
-    players_df['tot_aPts/tot_xPts'] = round(players_df['tot_aPts']/players_df['tot_xPts'], 5)
+    players_df['tot_aPts/tot_xPts'] = round(players_df['tot_aPts']/players_df['tot_xPts'], 8)
 
     PHI = 0.61803398874989484820
     phis = [PHI**2, PHI**1, PHI**0]
