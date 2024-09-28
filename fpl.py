@@ -199,7 +199,7 @@ fpl_teams_stats_df['att_potential'] = round(.618*fpl_teams_stats_df['Z(att_xPts)
 fpl_teams_stats_df['def_potential'] = round(.618*fpl_teams_stats_df['Z(def_xPts)'] - .382*fpl_teams_stats_df['Z(avg_GA/match)'], 8) 
 fpl_teams_stats_df['fpl_potential'] = round(.618*fpl_teams_stats_df['Z(fpl_xPts)'] + .382*fpl_teams_stats_df['Z(avg_GD/match)'], 8)
 
-fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['fpl_potential','fpl_xPts','fpl_pts/match','fpl_pts','avg_CS/match'], ascending=[False,False,False,False,False]).reset_index(drop=True)
+fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['fpl_potential','fpl_xPts','fpl_pts/match','fpl_pts','avg_CS/match'], ascending=[False,False,False,False,False]).reset_index(drop=True) ### THIS SORTING IS IN-ORDER & EXHAUSTIVE!
 
 fpl_teams_stats_df.insert(0, 'fpl_rank', 1 + fpl_teams_stats_df['team'].index)
 fpl_teams_stats_df.insert(1, 'fpl_tier', 1 + fpl_teams_stats_df['team'].index//2)
@@ -359,39 +359,68 @@ print("\n\n\n")
 
 ######################################################################################################################################################################################################################################################################################################################################
 avg_teams_stats_df = pd.DataFrame().assign(
-    team = fpl_teams_stats_df['team'], 
-    defAdv_nxtGWs = def_teams_stats_df['defAdv_nxtGWs'], 
-    fplAdv_nxtGWs = fpl_teams_stats_df['fplAdv_nxtGWs'],
+    team = fpl_teams_stats_df['team'],
+
+    att_rank = att_teams_stats_df['att_rank'],
+    def_rank = def_teams_stats_df['def_rank'],
+    fpl_rank = fpl_teams_stats_df['fpl_rank'],
+
+    att_tier = att_teams_stats_df['att_tier'],
+    def_tier = def_teams_stats_df['def_tier'],
+    fpl_tier = fpl_teams_stats_df['fpl_tier'],    
+    
+    att_potential = att_teams_stats_df['att_potential'],
+    def_potential = def_teams_stats_df['def_potential'], 
+    fpl_potential = fpl_teams_stats_df['fpl_potential'],
+    
     attAdv_nxtGWs = att_teams_stats_df['attAdv_nxtGWs'],
-    fpl_rank = fpl_teams_stats_df['fpl_rank'])
+    defAdv_nxtGWs = def_teams_stats_df['defAdv_nxtGWs'],
+    fplAdv_nxtGWs = fpl_teams_stats_df['fplAdv_nxtGWs']
+).set_index('team', drop=False)
 
-avg_teams_stats_df = avg_teams_stats_df.set_index('team')
+avg_teams_stats_df.insert(2, '∼fpl_rank', avg_teams_stats_df[['att_rank', 'def_rank']].mean(axis=1))
+avg_teams_stats_df.insert(4, 'rank_avg', avg_teams_stats_df[['∼fpl_rank', 'fpl_rank']].mean(axis=1))
 
-avg_teams_stats_df['avgAdv_nxtGWs'] = round((avg_teams_stats_df['defAdv_nxtGWs'] + avg_teams_stats_df['fplAdv_nxtGWs'] + avg_teams_stats_df['attAdv_nxtGWs'])/3, 2)
+avg_teams_stats_df.insert(7, '∼fpl_tier', avg_teams_stats_df[['att_tier', 'def_tier']].mean(axis=1))
+avg_teams_stats_df.insert(9, 'tier_avg', avg_teams_stats_df[['∼fpl_tier', 'fpl_tier']].mean(axis=1))
 
-avg_teams_stats_df = avg_teams_stats_df.sort_values(['avgAdv_nxtGWs','fplAdv_nxtGWs','fpl_rank'], ascending=[False,False,True]).reset_index(drop=False).drop(columns=['fpl_rank'])
+avg_teams_stats_df.insert(12, '∼fpl_potential', avg_teams_stats_df[['att_potential', 'def_potential']].mean(axis=1))
+avg_teams_stats_df.insert(14, 'avg_potential', avg_teams_stats_df[['∼fpl_potential', 'fpl_potential']].mean(axis=1))
+
+avg_teams_stats_df.insert(17, '∼fplAdv_nxtGWs', avg_teams_stats_df[['attAdv_nxtGWs', 'defAdv_nxtGWs']].mean(axis=1))
+avg_teams_stats_df.insert(19, 'avgAdv_nxtGWs', avg_teams_stats_df[['∼fplAdv_nxtGWs', 'fplAdv_nxtGWs']].mean(axis=1))
+
+avg_teams_stats_df = avg_teams_stats_df[['team', 'rank_avg', 'tier_avg', 'avg_potential', 'avgAdv_nxtGWs']]
+avg_teams_stats_df = avg_teams_stats_df.sort_values(['avg_potential','rank_avg','tier_avg'], ascending=[False,True,True]).reset_index(drop=True)
 
 avg_teams_stats_df.insert(0, 'avg_rank', 1 + avg_teams_stats_df['team'].index)
 avg_teams_stats_df.insert(1, 'avg_tier', 1 + avg_teams_stats_df['team'].index//2)
+
+avg_teams_stats_df = avg_teams_stats_df.sort_values(['avgAdv_nxtGWs','avg_rank'], ascending=[False,True])
 ######################################################################################################################################################################################################################################################################################################################################
 
 
 
 ######################################################################################################################################################################################################################################################################################################################################
-avg_teams_advanced_stats_df = avg_teams_stats_df[['team', 'attAdv_nxtGWs', 'defAdv_nxtGWs']].set_index('team', drop=False)
-avg_teams_advanced_stats_df.insert(0, 'att_rank', att_teams_stats_df['att_rank'])
-avg_teams_advanced_stats_df.insert(1, 'def_rank', def_teams_stats_df['def_rank'])
-avg_teams_advanced_stats_df.insert(2, 'diff=(def-att)_rank', avg_teams_advanced_stats_df['def_rank'] - avg_teams_advanced_stats_df['att_rank'])
-avg_teams_advanced_stats_df.insert(4, 'att_xPts', att_teams_stats_df['att_xPts'])
-avg_teams_advanced_stats_df.insert(5, 'def_xPts', def_teams_stats_df['def_xPts'])
-avg_teams_advanced_stats_df.insert(6, 'avg_(att-def)_xPts/match', avg_teams_advanced_stats_df['att_xPts'] - avg_teams_advanced_stats_df['def_xPts'])
-avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] = avg_teams_advanced_stats_df['attAdv_nxtGWs'] - avg_teams_advanced_stats_df['defAdv_nxtGWs']
+avg_teams_advanced_stats_df = pd.DataFrame().assign(
+    att_rank = att_teams_stats_df['att_rank'],
+    def_rank = def_teams_stats_df['def_rank'],
+    team = fpl_teams_stats_df['team'],
+    att_xPts = att_teams_stats_df['att_xPts'],
+    def_xPts = def_teams_stats_df['def_xPts'],
+    attAdv_nxtGWs = att_teams_stats_df['attAdv_nxtGWs'],
+    defAdv_nxtGWs = def_teams_stats_df['defAdv_nxtGWs']
+).set_index('team', drop=False)
+
+avg_teams_advanced_stats_df.insert(2, '(def-att)_rank', avg_teams_advanced_stats_df['def_rank'] - avg_teams_advanced_stats_df['att_rank'])
+avg_teams_advanced_stats_df.insert(6, '(att-def)_xPts', avg_teams_advanced_stats_df['att_xPts'] - avg_teams_advanced_stats_df['def_xPts'])
+avg_teams_advanced_stats_df['(att-def)Adv_nxtGWs'] = avg_teams_advanced_stats_df['attAdv_nxtGWs'] - avg_teams_advanced_stats_df['defAdv_nxtGWs']
 avg_teams_advanced_stats_df['#OfMatches_nxtGWs'] = avg_teams_advanced_stats_df['team'].map(teams_nxtGWsNberOfMatches_dict)
-avg_teams_advanced_stats_df['delta/#OfMatches_nxtGWs'] = round(avg_teams_advanced_stats_df['delta=(att-def)Adv_nxtGWs'] / avg_teams_advanced_stats_df['#OfMatches_nxtGWs'], 8)
+avg_teams_advanced_stats_df['(att-def)Adv_nxtGWs/#OfMatches_nxtGWs'] = round(avg_teams_advanced_stats_df['(att-def)Adv_nxtGWs'] / avg_teams_advanced_stats_df['#OfMatches_nxtGWs'], 8)
 
-avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['delta/#OfMatches_nxtGWs', 'diff=(def-att)_rank', 'avg_(att-def)_xPts/match'], ascending=[True, True, True]) ### IS THE SORTING ORDER THE BEST? I THINK SO!!! IF NOT, INTERCHANGE 'diff...' AND 'avg_(att-def)...' ###
+avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['(att-def)Adv_nxtGWs/#OfMatches_nxtGWs', '(def-att)_rank', '(att-def)_xPts'], ascending=[True, True, True]) ### IS THE SORTING ORDER THE BEST? I THINK SO!!! IF NOT, INTERCHANGE '(def-att)_rank' AND '(att-def)_xPts' ###
 
-####################################################################################################################################################################################################################################################################################
+#################################################################################################################################################################################################################################################################################################
 avg_teams_advanced_stats_df['#atts'] = 0
 avg_teams_advanced_stats_df['#defs'] = 0 
 
@@ -400,7 +429,7 @@ playing_teams_indices = avg_teams_advanced_stats_df[avg_teams_advanced_stats_df[
 divisor = number_of_playing_teams / 4
 avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts'] = [int(i // divisor) for i in range(len(playing_teams_indices))]
 avg_teams_advanced_stats_df.loc[playing_teams_indices, '#defs'] = 3 - avg_teams_advanced_stats_df.loc[playing_teams_indices, '#atts']
-####################################################################################################################################################################################################################################################################################
+#################################################################################################################################################################################################################################################################################################
 
 
 players_df['#OfMatches_nxtGWs'] = players_df['team'].map(teams_nxtGWsNberOfMatches_dict)
