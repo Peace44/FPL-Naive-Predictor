@@ -76,17 +76,17 @@ if update.lower()[0] == 'y':
     players_df.loc[(players_df['tot_aPts/tot_xPts'] >= F), 'nxtGWsPtsTrend'] = '^^^'
 
     players_df.to_csv(fileToUpdate, index=False)
-    
+
     print("\n\n\n")
-    print(f"vvv ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] <  A), 'nxtGWsPtsTrend'].index)} players")
-    print(f" vv ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] >= A), 'nxtGWsPtsTrend'].index)} players")
-    print(f"  v ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] >= B), 'nxtGWsPtsTrend'].index)} players")
-    print(f"  ~ ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] >= C), 'nxtGWsPtsTrend'].index)} players")
-    print(f"  ^ ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] >= D), 'nxtGWsPtsTrend'].index)} players")
-    print(f" ^^ ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] >= E), 'nxtGWsPtsTrend'].index)} players")
-    print(f"^^^ ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] >= F), 'nxtGWsPtsTrend'].index)} players")
+    print(f"vvv ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  'vvv')].index)} players")
+    print(f" vv ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  'vv')].index)} players")
+    print(f"  v ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  'v')].index)} players")
+    print(f"  ~ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  '~')].index)} players")
+    print(f"  ^ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  '^')].index)} players")
+    print(f" ^^ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  '^^')].index)} players")
+    print(f"^^^ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  '^^^')].index)} players")
     print("\n\n\n")
-    
+
     print(f"{len(players_aPts_dicts[0])} updates made out of {len(players_df)} total players!!!")
 
 
