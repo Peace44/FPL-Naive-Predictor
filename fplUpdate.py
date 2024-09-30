@@ -67,7 +67,7 @@ if update.lower()[0] == 'y':
     phis = [PHI**2, PHI**1, PHI**0]
     A, B, C, D, E, F = [1 - phis[2], 1 - phis[1], 1 - phis[0], 1 + phis[0], 1 + phis[1], 1 + phis[2]]
 
-    players_df.loc[(players_df['tot_aPts/tot_xPts'] < A), 'nxtGWsPtsTrend'] = 'vvv'
+    players_df.loc[(players_df['tot_aPts/tot_xPts'] <  A), 'nxtGWsPtsTrend'] = 'vvv'
     players_df.loc[(players_df['tot_aPts/tot_xPts'] >= A) & (players_df['tot_aPts/tot_xPts'] < B), 'nxtGWsPtsTrend'] = 'vv'
     players_df.loc[(players_df['tot_aPts/tot_xPts'] >= B) & (players_df['tot_aPts/tot_xPts'] < C), 'nxtGWsPtsTrend'] = 'v'
     players_df.loc[(players_df['tot_aPts/tot_xPts'] >= C) & (players_df['tot_aPts/tot_xPts'] < D), 'nxtGWsPtsTrend'] = '~'
@@ -76,7 +76,17 @@ if update.lower()[0] == 'y':
     players_df.loc[(players_df['tot_aPts/tot_xPts'] >= F), 'nxtGWsPtsTrend'] = '^^^'
 
     players_df.to_csv(fileToUpdate, index=False)
+    
     print("\n\n\n")
+    print(f"vvv ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] <  A), 'nxtGWsPtsTrend'].index)} players")
+    print(f" vv ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] >= A), 'nxtGWsPtsTrend'].index)} players")
+    print(f"  v ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] >= B), 'nxtGWsPtsTrend'].index)} players")
+    print(f"  ~ ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] >= C), 'nxtGWsPtsTrend'].index)} players")
+    print(f"  ^ ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] >= D), 'nxtGWsPtsTrend'].index)} players")
+    print(f" ^^ ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] >= E), 'nxtGWsPtsTrend'].index)} players")
+    print(f"^^^ ==> {len(players_df.loc[(players_df['tot_aPts/tot_xPts'] >= F), 'nxtGWsPtsTrend'].index)} players")
+    print("\n\n\n")
+    
     print(f"{len(players_aPts_dicts[0])} updates made out of {len(players_df)} total players!!!")
 
 
