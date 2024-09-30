@@ -433,11 +433,11 @@ avg_teams_advanced_stats_df.loc[playing_teams_indices, '#defs'] = 3 - avg_teams_
 
 
 players_df['#OfMatches_nxtGWs'] = players_df['team'].map(teams_nxtGWsNberOfMatches_dict)
-players_df['tot_xPts'] = round(players_df['#OfMatches_nxtGWs'] * players_df['xPts'], 8)
+
 for gw in gws:
     players_df["gw" + str(gw) + "Pts"] = 0
 players_df['tot_aPts'] = 0
-players_df['tot_aPts/tot_xPts'] = 0
+players_df['tot_aPts/^avgAdv*xPts'] = 0
 players_df['nxtGWsPtsTrend'] = '?'
 
 
