@@ -265,10 +265,9 @@ def_teamsAdv_dict = {}
 att_teamsAdv_dict = {}
 teams_nxtGWsNberOfMatches_dict = {}
 
-# players_df.loc[(players_df['pts/game'] <= 0) | (players_df['form'] <= 0) | (players_df['xPts'] < 0), 'xPts'] = 0
-players_df['^fplAdv*xPts'] = 0 ### ^fplAdv is the normalized fplAdv (to [0,1]) ###
-players_df['^defAdv*xPts'] = 0 ### ^defAdv is the normalized defAdv (to [0,1]) ###
-players_df['^attAdv*xPts'] = 0 ### ^attAdv is the normalized attAdv (to [0,1]) ###
+players_df['fplAdv_nxtGWs'] = players_df['^fplAdv*xPts'] = 0 ### ^fplAdv is the normalized fplAdv (to [0,1]) ###
+players_df['defAdv_nxtGWs'] = players_df['^defAdv*xPts'] = 0 ### ^defAdv is the normalized defAdv (to [0,1]) ###
+players_df['attAdv_nxtGWs'] = players_df['^attAdv*xPts'] = 0 ### ^attAdv is the normalized attAdv (to [0,1]) ###
 players_df['^avgAdv*xPts'] = 0 ### ^avgAdv is the normalized avgAdv (to [0,1]) ###
 
 for fixture in fixtures_data: # for fixture in upcoming_fixtures_data

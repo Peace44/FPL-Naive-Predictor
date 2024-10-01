@@ -61,19 +61,19 @@ if update.lower()[0] == 'y':
     for i in range(len(colsToUpdate)):
         players_df[colsToUpdate[i]] = players_df['id'].map(players_aPts_dicts[i])
 
-    players_df['tot_aPts/tot_xPts'] = round(players_df['tot_aPts']/players_df['tot_xPts'], 8)
+    players_df['tot_aPts/^avgAdv*xPts'] = round(players_df['tot_aPts']/players_df['^avgAdv*xPts'], 8)
 
     PHI = 0.61803398874989484820
     phis = [PHI**2, PHI**1, PHI**0]
     A, B, C, D, E, F = [1 - phis[2], 1 - phis[1], 1 - phis[0], 1 + phis[0], 1 + phis[1], 1 + phis[2]]
 
-    players_df.loc[(players_df['tot_aPts/tot_xPts'] <  A), 'nxtGWsPtsTrend'] = 'vvv'
-    players_df.loc[(players_df['tot_aPts/tot_xPts'] >= A) & (players_df['tot_aPts/tot_xPts'] < B), 'nxtGWsPtsTrend'] = 'vv'
-    players_df.loc[(players_df['tot_aPts/tot_xPts'] >= B) & (players_df['tot_aPts/tot_xPts'] < C), 'nxtGWsPtsTrend'] = 'v'
-    players_df.loc[(players_df['tot_aPts/tot_xPts'] >= C) & (players_df['tot_aPts/tot_xPts'] < D), 'nxtGWsPtsTrend'] = '~'
-    players_df.loc[(players_df['tot_aPts/tot_xPts'] >= D) & (players_df['tot_aPts/tot_xPts'] < E), 'nxtGWsPtsTrend'] = '^'
-    players_df.loc[(players_df['tot_aPts/tot_xPts'] >= E) & (players_df['tot_aPts/tot_xPts'] < F), 'nxtGWsPtsTrend'] = '^^'
-    players_df.loc[(players_df['tot_aPts/tot_xPts'] >= F), 'nxtGWsPtsTrend'] = '^^^'
+    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] <  A), 'nxtGWsPtsTrend'] = 'vvv'
+    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] >= A) & (players_df['tot_aPts/^avgAdv*xPts'] < B), 'nxtGWsPtsTrend'] = 'vv'
+    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] >= B) & (players_df['tot_aPts/^avgAdv*xPts'] < C), 'nxtGWsPtsTrend'] = 'v'
+    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] >= C) & (players_df['tot_aPts/^avgAdv*xPts'] < D), 'nxtGWsPtsTrend'] = '~'
+    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] >= D) & (players_df['tot_aPts/^avgAdv*xPts'] < E), 'nxtGWsPtsTrend'] = '^'
+    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] >= E) & (players_df['tot_aPts/^avgAdv*xPts'] < F), 'nxtGWsPtsTrend'] = '^^'
+    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] >= F), 'nxtGWsPtsTrend'] = '^^^'
 
     players_df.to_csv(fileToUpdate, index=False)
 
