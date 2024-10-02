@@ -2,8 +2,10 @@ import asyncio
 from aiohttp import ClientSession
 import re
 import pandas as pd
+import math
 
-
+def signedRelError(aPts, xPts):
+    return (aPts - xPts)/abs(xPts)
 
 day = int(input("Provide the day value (1 to 31): "))
 month = int(input("Provide the month value (1 to 12): "))
@@ -61,30 +63,46 @@ if update.lower()[0] == 'y':
     for i in range(len(colsToUpdate)):
         players_df[colsToUpdate[i]] = players_df['id'].map(players_aPts_dicts[i])
 
-    players_df['tot_aPts/^avgAdv*xPts'] = round(players_df['tot_aPts']/players_df['^avgAdv*xPts'], 8)
+    players_df['(tot_aPts)-(^avgAdv*xPts)'] = players_df['tot_aPts'] - players_df['^avgAdv*xPts']
 
-    PHI = 0.61803398874989484820
-    phis = [PHI**2, PHI**1, PHI**0]
-    A, B, C, D, E, F = [1 - phis[2], 1 - phis[1], 1 - phis[0], 1 + phis[0], 1 + phis[1], 1 + phis[2]]
+    PHI = 1.61803398874989484820
+    phis = [PHI**i for i in range(0, 7)]
+    A, B, C, D, E, F, G = phis
 
-    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] <  A), 'nxtGWsPtsTrend'] = 'vvv'
-    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] >= A) & (players_df['tot_aPts/^avgAdv*xPts'] < B), 'nxtGWsPtsTrend'] = 'vv'
-    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] >= B) & (players_df['tot_aPts/^avgAdv*xPts'] < C), 'nxtGWsPtsTrend'] = 'v'
-    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] >= C) & (players_df['tot_aPts/^avgAdv*xPts'] < D), 'nxtGWsPtsTrend'] = '~'
-    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] >= D) & (players_df['tot_aPts/^avgAdv*xPts'] < E), 'nxtGWsPtsTrend'] = '^'
-    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] >= E) & (players_df['tot_aPts/^avgAdv*xPts'] < F), 'nxtGWsPtsTrend'] = '^^'
-    players_df.loc[(players_df['tot_aPts/^avgAdv*xPts'] >= F), 'nxtGWsPtsTrend'] = '^^^'
+    players_df.loc[                                                  (players_df['(tot_aPts)-(^avgAdv*xPts)'] <  -G), 'nxtGWsPtsTrend'] = '7↓'
+    players_df.loc[(-G <= players_df['(tot_aPts)-(^avgAdv*xPts)']) & (players_df['(tot_aPts)-(^avgAdv*xPts)'] <  -F), 'nxtGWsPtsTrend'] = '6↓'
+    players_df.loc[(-F <= players_df['(tot_aPts)-(^avgAdv*xPts)']) & (players_df['(tot_aPts)-(^avgAdv*xPts)'] <  -E), 'nxtGWsPtsTrend'] = '5↓'
+    players_df.loc[(-E <= players_df['(tot_aPts)-(^avgAdv*xPts)']) & (players_df['(tot_aPts)-(^avgAdv*xPts)'] <  -D), 'nxtGWsPtsTrend'] = '4↓'
+    players_df.loc[(-D <= players_df['(tot_aPts)-(^avgAdv*xPts)']) & (players_df['(tot_aPts)-(^avgAdv*xPts)'] <  -C), 'nxtGWsPtsTrend'] = '3↓'
+    players_df.loc[(-C <= players_df['(tot_aPts)-(^avgAdv*xPts)']) & (players_df['(tot_aPts)-(^avgAdv*xPts)'] <  -B), 'nxtGWsPtsTrend'] = '2↓'
+    players_df.loc[(-B <= players_df['(tot_aPts)-(^avgAdv*xPts)']) & (players_df['(tot_aPts)-(^avgAdv*xPts)'] <  -A), 'nxtGWsPtsTrend'] = '1↓'
+    players_df.loc[(-A <= players_df['(tot_aPts)-(^avgAdv*xPts)']) & (players_df['(tot_aPts)-(^avgAdv*xPts)'] <= +A), 'nxtGWsPtsTrend'] = '~'
+    players_df.loc[(+A <  players_df['(tot_aPts)-(^avgAdv*xPts)']) & (players_df['(tot_aPts)-(^avgAdv*xPts)'] <= +B), 'nxtGWsPtsTrend'] = '1↑'
+    players_df.loc[(+B <  players_df['(tot_aPts)-(^avgAdv*xPts)']) & (players_df['(tot_aPts)-(^avgAdv*xPts)'] <= +C), 'nxtGWsPtsTrend'] = '2↑'
+    players_df.loc[(+C <  players_df['(tot_aPts)-(^avgAdv*xPts)']) & (players_df['(tot_aPts)-(^avgAdv*xPts)'] <= +D), 'nxtGWsPtsTrend'] = '3↑'
+    players_df.loc[(+D <  players_df['(tot_aPts)-(^avgAdv*xPts)']) & (players_df['(tot_aPts)-(^avgAdv*xPts)'] <= +E), 'nxtGWsPtsTrend'] = '4↑'
+    players_df.loc[(+E <  players_df['(tot_aPts)-(^avgAdv*xPts)']) & (players_df['(tot_aPts)-(^avgAdv*xPts)'] <= +F), 'nxtGWsPtsTrend'] = '5↑'
+    players_df.loc[(+F <  players_df['(tot_aPts)-(^avgAdv*xPts)']) & (players_df['(tot_aPts)-(^avgAdv*xPts)'] <= +G), 'nxtGWsPtsTrend'] = '6↑'
+    players_df.loc[(+G <  players_df['(tot_aPts)-(^avgAdv*xPts)'])                                                  , 'nxtGWsPtsTrend'] = '7↑'
 
     players_df.to_csv(fileToUpdate, index=False)
 
     print("\n\n\n")
-    print(f"vvv ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  'vvv')].index)} players")
-    print(f" vv ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  'vv')].index)} players")
-    print(f"  v ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  'v')].index)} players")
-    print(f"  ~ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  '~')].index)} players")
-    print(f"  ^ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  '^')].index)} players")
-    print(f" ^^ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  '^^')].index)} players")
-    print(f"^^^ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  '^^^')].index)} players")
+    print(f"7↓ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '7↓')].index)} players")
+    print(f"6↓ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '6↓')].index)} players")
+    print(f"5↓ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '5↓')].index)} players")
+    print(f"4↓ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '4↓')].index)} players")
+    print(f"3↓ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '3↓')].index)} players")
+    print(f"2↓ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '2↓')].index)} players")
+    print(f"1↓ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '1↓')].index)} players")
+    print(f" ~ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] ==  '~')].index)} players")
+    print(f"1↑ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '1↑')].index)} players")
+    print(f"2↑ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '2↑')].index)} players")
+    print(f"3↑ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '3↑')].index)} players")
+    print(f"4↑ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '4↑')].index)} players")
+    print(f"5↑ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '5↑')].index)} players")
+    print(f"6↑ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '6↑')].index)} players")
+    print(f"7↑ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '7↑')].index)} players")
     print("\n\n\n")
 
     print(f"{len(players_aPts_dicts[0])} updates made out of {len(players_df)} total players!!!")
