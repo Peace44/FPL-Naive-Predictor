@@ -436,7 +436,7 @@ players_df['#OfMatches_nxtGWs'] = players_df['team'].map(teams_nxtGWsNberOfMatch
 for gw in gws:
     players_df["gw" + str(gw) + "Pts"] = 0
 players_df['tot_aPts'] = 0
-players_df['tot_aPts/^avgAdv*xPts'] = 0
+players_df['(tot_aPts)-(^avgAdv*xPts)'] = 0
 players_df['nxtGWsPtsTrend'] = '?'
 
 
