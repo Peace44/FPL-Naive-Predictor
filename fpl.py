@@ -146,7 +146,7 @@ for player in players:
     player_dict['web_name'] = player['web_name'] + f" ({player_dict['position']}, {player_dict['prvGWsPtsTrend']})"
     player_dict['pts/game'] = float64(player['points_per_game'])
     player_dict['form'] = float64(player['form'])
-    player_dict['xPts'] = round((1/2)*player_dict['pts/game'] + (1/2)*player_dict['form'], 8) # for a player form is as important as pts/game, for a team fpl_pts/match is more important!
+    player_dict['xPts'] = round((1/2)*player_dict['pts/game'] + (1/2)*player_dict['form'], 11) # for a player form is as important as pts/game, for a team fpl_pts/match is more important!
     players_stats.append(player_dict)
 
 players_df = pd.DataFrame(players_stats).set_index('id', drop=False)
@@ -159,45 +159,52 @@ players_df = players_df.sort_values(['team', 'form', 'xPts', 'tot_pts'], ascendi
 
 
 ######################################################################################################################################################################################################################################################################################################################################
+def Z(series): ### Z-score of series
+    return round((series - series.mean())/series.std(), 11)
+######################################################################################################################################################################################################################################################################################################################################
+
+
+
+######################################################################################################################################################################################################################################################################################################################################
 fpl_teams_stats_df = players_df.groupby('team').sum(numeric_only=True).reset_index().drop(columns=['id', 'pts/game', 'xPts'], axis='columns').rename(columns={'tot_pts':'fpl_pts','form':'fpl_form'})
 fpl_teams_stats_df.insert(1, 'matches_played', fpl_teams_stats_df['team'].map(matches_played_dict))
-fpl_teams_stats_df.insert(3, 'fpl_pts/match', round(fpl_teams_stats_df['fpl_pts'] / fpl_teams_stats_df['matches_played'], 8))
-fpl_teams_stats_df['fpl_xPts'] = round(.618*fpl_teams_stats_df['fpl_pts/match'] + .382*fpl_teams_stats_df['fpl_form'], 8) # for a team fpl_form is less important than fpl_pts/match!
-fpl_teams_stats_df['Z(fpl_xPts)'] = round((fpl_teams_stats_df['fpl_xPts'] - fpl_teams_stats_df['fpl_xPts'].mean())/fpl_teams_stats_df['fpl_xPts'].std(), 8) ### Z-score of fpl_xPts
+fpl_teams_stats_df.insert(3, 'fpl_pts/match', round(fpl_teams_stats_df['fpl_pts'] / fpl_teams_stats_df['matches_played'], 11))
+fpl_teams_stats_df['fpl_xPts'] = round(.618*fpl_teams_stats_df['fpl_pts/match'] + .382*fpl_teams_stats_df['fpl_form'], 11) # for a team fpl_form is less important than fpl_pts/match!
+fpl_teams_stats_df['Z(fpl_xPts)'] = Z(fpl_teams_stats_df['fpl_xPts']) ### Z-score of fpl_xPts
 
 defensive_players = players_df[(players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')] # gkps and defs
 attacking_players = players_df[(players_df['position'] == 'MID') | (players_df['position'] == 'FWD')] # mids and fwds
 
 fpl_teams_stats_df['def_pts'] = defensive_players.groupby('team').sum(numeric_only=True).reset_index()['tot_pts']
-fpl_teams_stats_df['def_pts/match'] = round(fpl_teams_stats_df['def_pts'] / fpl_teams_stats_df['matches_played'], 8)
+fpl_teams_stats_df['def_pts/match'] = round(fpl_teams_stats_df['def_pts'] / fpl_teams_stats_df['matches_played'], 11)
 fpl_teams_stats_df['def_form'] = defensive_players.groupby('team').sum(numeric_only=True).reset_index()['form']
-fpl_teams_stats_df['def_xPts'] = round(.618*fpl_teams_stats_df['def_pts/match'] + .382*fpl_teams_stats_df['def_form'], 8)
-fpl_teams_stats_df['Z(def_xPts)'] = round((fpl_teams_stats_df['def_xPts'] - fpl_teams_stats_df['def_xPts'].mean())/fpl_teams_stats_df['def_xPts'].std(), 8) ### Z-score of def_xPts
+fpl_teams_stats_df['def_xPts'] = round(.618*fpl_teams_stats_df['def_pts/match'] + .382*fpl_teams_stats_df['def_form'], 11)
+fpl_teams_stats_df['Z(def_xPts)'] = Z(fpl_teams_stats_df['def_xPts']) ### Z-score of def_xPts
 
 fpl_teams_stats_df['att_pts'] = attacking_players.groupby('team').sum(numeric_only=True).reset_index()['tot_pts']
-fpl_teams_stats_df['att_pts/match'] = round(fpl_teams_stats_df['att_pts'] / fpl_teams_stats_df['matches_played'], 8)
+fpl_teams_stats_df['att_pts/match'] = round(fpl_teams_stats_df['att_pts'] / fpl_teams_stats_df['matches_played'], 11)
 fpl_teams_stats_df['att_form'] = attacking_players.groupby('team').sum(numeric_only=True).reset_index()['form']
-fpl_teams_stats_df['att_xPts'] = round(.618*fpl_teams_stats_df['att_pts/match'] + .382*fpl_teams_stats_df['att_form'], 8)
-fpl_teams_stats_df['Z(att_xPts)'] = round((fpl_teams_stats_df['att_xPts'] - fpl_teams_stats_df['att_xPts'].mean())/fpl_teams_stats_df['att_xPts'].std(), 8) ### Z-score of att_xPts
+fpl_teams_stats_df['att_xPts'] = round(.618*fpl_teams_stats_df['att_pts/match'] + .382*fpl_teams_stats_df['att_form'], 11)
+fpl_teams_stats_df['Z(att_xPts)'] = Z(fpl_teams_stats_df['att_xPts']) ### Z-score of att_xPts
 
 fpl_teams_stats_df['goals_for'] = fpl_teams_stats_df['team'].map(goals_for_dict)
-fpl_teams_stats_df['avg_GF/match'] = round(fpl_teams_stats_df['goals_for'] / fpl_teams_stats_df['matches_played'], 8)
-fpl_teams_stats_df['Z(avg_GF/match)'] = round((fpl_teams_stats_df['avg_GF/match'] - fpl_teams_stats_df['avg_GF/match'].mean())/fpl_teams_stats_df['avg_GF/match'].std(), 8) ### Z-score of avg_GF/match
+fpl_teams_stats_df['avg_GF/match'] = round(fpl_teams_stats_df['goals_for'] / fpl_teams_stats_df['matches_played'], 11)
+fpl_teams_stats_df['Z(avg_GF/match)'] = Z(fpl_teams_stats_df['avg_GF/match']) ### Z-score of avg_GF/match
 
 fpl_teams_stats_df['goals_against'] = fpl_teams_stats_df['team'].map(goals_against_dict)
-fpl_teams_stats_df['avg_GA/match'] = round(fpl_teams_stats_df['goals_against'] / fpl_teams_stats_df['matches_played'], 8)
-fpl_teams_stats_df['Z(avg_GA/match)'] = round((fpl_teams_stats_df['avg_GA/match'] - fpl_teams_stats_df['avg_GA/match'].mean())/fpl_teams_stats_df['avg_GA/match'].std(), 8) ### Z-score of avg_GA/match
+fpl_teams_stats_df['avg_GA/match'] = round(fpl_teams_stats_df['goals_against'] / fpl_teams_stats_df['matches_played'], 11)
+fpl_teams_stats_df['Z(avg_GA/match)'] = Z(fpl_teams_stats_df['avg_GA/match']) ### Z-score of avg_GA/match
 
 fpl_teams_stats_df['goal_diff'] = fpl_teams_stats_df['goals_for'] - fpl_teams_stats_df['goals_against']
-fpl_teams_stats_df['avg_GD/match'] = round(fpl_teams_stats_df['goal_diff'] / fpl_teams_stats_df['matches_played'], 8)
-fpl_teams_stats_df['Z(avg_GD/match)'] = round((fpl_teams_stats_df['avg_GD/match'] - fpl_teams_stats_df['avg_GD/match'].mean())/fpl_teams_stats_df['avg_GD/match'].std(), 8) ### Z-score of avg_GD/match
+fpl_teams_stats_df['avg_GD/match'] = round(fpl_teams_stats_df['goal_diff'] / fpl_teams_stats_df['matches_played'], 11)
+fpl_teams_stats_df['Z(avg_GD/match)'] = Z(fpl_teams_stats_df['avg_GD/match']) ### Z-score of avg_GD/match
 
 fpl_teams_stats_df['clean_sheets'] = fpl_teams_stats_df['team'].map(clean_sheets_dict)
-fpl_teams_stats_df['avg_CS/match'] = round(fpl_teams_stats_df['clean_sheets'] / fpl_teams_stats_df['matches_played'], 8)
+fpl_teams_stats_df['avg_CS/match'] = round(fpl_teams_stats_df['clean_sheets'] / fpl_teams_stats_df['matches_played'], 11)
 
-fpl_teams_stats_df['att_potential'] = round(.618*fpl_teams_stats_df['Z(att_xPts)'] + .382*fpl_teams_stats_df['Z(avg_GF/match)'], 8)
-fpl_teams_stats_df['def_potential'] = round(.618*fpl_teams_stats_df['Z(def_xPts)'] - .382*fpl_teams_stats_df['Z(avg_GA/match)'], 8) 
-fpl_teams_stats_df['fpl_potential'] = round(.618*fpl_teams_stats_df['Z(fpl_xPts)'] + .382*fpl_teams_stats_df['Z(avg_GD/match)'], 8)
+fpl_teams_stats_df['att_potential'] = round(.618*fpl_teams_stats_df['Z(att_xPts)'] + .382*fpl_teams_stats_df['Z(avg_GF/match)'], 11)
+fpl_teams_stats_df['def_potential'] = round(.618*fpl_teams_stats_df['Z(def_xPts)'] - .382*fpl_teams_stats_df['Z(avg_GA/match)'], 11) 
+fpl_teams_stats_df['fpl_potential'] = round(.618*fpl_teams_stats_df['Z(fpl_xPts)'] + .382*fpl_teams_stats_df['Z(avg_GD/match)'], 11)
 
 fpl_teams_stats_df = fpl_teams_stats_df.sort_values(['fpl_potential','fpl_xPts','fpl_pts/match','fpl_pts','avg_CS/match'], ascending=[False,False,False,False,False]).reset_index(drop=True) ### THIS SORTING IS IN-ORDER & EXHAUSTIVE!
 
@@ -316,7 +323,7 @@ for fixture in fixtures_data: # for fixture in upcoming_fixtures_data
 
 
 nxtGWs_fixtures_df = pd.DataFrame(nxtGWs_fixtures)
-players_df['^avgAdv*xPts'] = round((players_df['^fplAdv*xPts'] + players_df['^defAdv*xPts'] + players_df['^attAdv*xPts']) / 2, 8)
+players_df['^avgAdv*xPts'] = round((players_df['^fplAdv*xPts'] + players_df['^defAdv*xPts'] + players_df['^attAdv*xPts']) / 2, 11)
 
 
 
@@ -415,7 +422,7 @@ avg_teams_advanced_stats_df.insert(2, '(def-att)_rank', avg_teams_advanced_stats
 avg_teams_advanced_stats_df.insert(6, '(att-def)_xPts', avg_teams_advanced_stats_df['att_xPts'] - avg_teams_advanced_stats_df['def_xPts'])
 avg_teams_advanced_stats_df['(att-def)Adv_nxtGWs'] = avg_teams_advanced_stats_df['attAdv_nxtGWs'] - avg_teams_advanced_stats_df['defAdv_nxtGWs']
 avg_teams_advanced_stats_df['#OfMatches_nxtGWs'] = avg_teams_advanced_stats_df['team'].map(teams_nxtGWsNberOfMatches_dict)
-avg_teams_advanced_stats_df['(att-def)Adv_nxtGWs/#OfMatches_nxtGWs'] = round(avg_teams_advanced_stats_df['(att-def)Adv_nxtGWs'] / avg_teams_advanced_stats_df['#OfMatches_nxtGWs'], 8)
+avg_teams_advanced_stats_df['(att-def)Adv_nxtGWs/#OfMatches_nxtGWs'] = round(avg_teams_advanced_stats_df['(att-def)Adv_nxtGWs'] / avg_teams_advanced_stats_df['#OfMatches_nxtGWs'], 11)
 
 avg_teams_advanced_stats_df = avg_teams_advanced_stats_df.sort_values(['(att-def)Adv_nxtGWs/#OfMatches_nxtGWs', '(def-att)_rank', '(att-def)_xPts'], ascending=[True, True, True]) ### IS THE SORTING ORDER THE BEST? I THINK SO!!! IF NOT, INTERCHANGE '(def-att)_rank' AND '(att-def)_xPts' ###
 
