@@ -347,18 +347,24 @@ for fixture in fixtures_data: # for fixture in upcoming_fixtures_data
         
         players_df.loc[players_df['team'] == home_team, '^fplAdv*xPts'] += ((9 + fixture_dict['home_fplAdv']) / 18) * players_df['xPts']
         players_df.loc[players_df['team'] == away_team, '^fplAdv*xPts'] += ((9 + fixture_dict['away_fplAdv']) / 18) * players_df['xPts']
+        # players_df.loc[players_df['team'] == home_team, '^fplAdv*xPts'] += golden_sum(players_df['xPts'], (fixture_dict['home_fplAdv'] / 9) * players_df['avgPtsDev']) ### in this case, is ^fplAdv*xPts still the best nomenclature?
+        # players_df.loc[players_df['team'] == away_team, '^fplAdv*xPts'] += golden_sum(players_df['xPts'], (fixture_dict['away_fplAdv'] / 9) * players_df['avgPtsDev']) ### in this case, is ^fplAdv*xPts still the best nomenclature?
         #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
         def_teamsAdv_dict[home_team] = def_teamsAdv_dict.get(home_team, 0) + fixture_dict['home_defAdv']
         def_teamsAdv_dict[away_team] = def_teamsAdv_dict.get(away_team, 0) + fixture_dict['away_defAdv']
         
         players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['team'] == home_team), '^defAdv*xPts'] += ((9 + fixture_dict['home_defAdv']) / 18) * players_df['xPts']
         players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['team'] == away_team), '^defAdv*xPts'] += ((9 + fixture_dict['away_defAdv']) / 18) * players_df['xPts']
+        # players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['team'] == home_team), '^defAdv*xPts'] += golden_sum(players_df['xPts'], (fixture_dict['home_defAdv'] / 9) * players_df['avgPtsDev']) ### in this case, is ^defAdv*xPts still the best nomenclature?
+        # players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['team'] == away_team), '^defAdv*xPts'] += golden_sum(players_df['xPts'], (fixture_dict['away_defAdv'] / 9) * players_df['avgPtsDev']) ### in this case, is ^defAdv*xPts still the best nomenclature?
         #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
         att_teamsAdv_dict[home_team] = att_teamsAdv_dict.get(home_team, 0) + fixture_dict['home_attAdv']
         att_teamsAdv_dict[away_team] = att_teamsAdv_dict.get(away_team, 0) + fixture_dict['away_attAdv']
         
         players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['team'] == home_team), '^attAdv*xPts'] += ((9 + fixture_dict['home_attAdv']) / 18) * players_df['xPts']
         players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['team'] == away_team), '^attAdv*xPts'] += ((9 + fixture_dict['away_attAdv']) / 18) * players_df['xPts']
+        # players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['team'] == home_team), '^attAdv*xPts'] += golden_sum(players_df['xPts'], (fixture_dict['home_attAdv'] / 9) * players_df['avgPtsDev']) ### in this case, is ^attAdv*xPts still the best nomenclature?
+        # players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['team'] == away_team), '^attAdv*xPts'] += golden_sum(players_df['xPts'], (fixture_dict['away_attAdv'] / 9) * players_df['avgPtsDev']) ### in this case, is ^attAdv*xPts still the best nomenclature?
         #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
         teams_nxtGWsNberOfMatches_dict[home_team] = teams_nxtGWsNberOfMatches_dict.get(home_team, 0) + 1
