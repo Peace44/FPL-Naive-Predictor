@@ -104,6 +104,8 @@ if update.lower()[0] == 'y':
     print(f"6↑ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '6↑')].index)} players")
     print(f"7↑ ==> {len(players_df.loc[(players_df['nxtGWsPtsTrend'] == '7↑')].index)} players")
     print("\n\n\n")
+    print(f"∑|(tot_aPts)-(^avgAdv*xPts)| = {players_df['(tot_aPts)-(^avgAdv*xPts)'].abs().sum()}")
+    print("\n\n\n")
 
     print(f"{len(players_aPts_dicts[0])} updates made out of {len(players_df)} total players!!!")
 
