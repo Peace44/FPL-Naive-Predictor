@@ -109,11 +109,11 @@ if update.lower()[0] == 'y':
 
 
 # print("\n\n\n")
-# print(players_df.loc[(players_df['team'] == 'MCI')].head(30).to_string(index=False))
+# print(players_df.loc[(players_df['team'] == 'MCI')].head(37).to_string(index=False))
 # print("\n\n\n")
-# print(players_df.loc[(players_df['team'] == 'ARS')].head(30).to_string(index=False))
+# print(players_df.loc[(players_df['team'] == 'ARS')].head(37).to_string(index=False))
 # print("\n\n\n")
-# print(players_df.loc[(players_df['team'] == 'LIV')].head(30).to_string(index=False))
+# print(players_df.loc[(players_df['team'] == 'LIV')].head(37).to_string(index=False))
 # print("\n\n\n")
-# print(players_df.loc[(players_df['team'] == 'SOU')].head(30).to_string(index=False))
+# print(players_df.loc[(players_df['team'] == 'SOU')].head(37).to_string(index=False))
 # print("\n\n\n")
