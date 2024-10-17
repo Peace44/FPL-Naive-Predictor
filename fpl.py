@@ -201,7 +201,8 @@ for gw in range(1, nxtGW): ### fetch per-gameweek data for all players
             for gwFixture in gwFixtures: ### sometimes we have 2ble gameweeks!
                 fixture_stats = gwFixture['stats']
                 fixture_pts = sum(fixture_stat['points'] for fixture_stat in fixture_stats)
-                if fixture_stats[0]['identifier'] == 'minutes' and fixture_stats[0]['value'] > 0: ### if the player actually played in that fixture        
+                fixture_minutes = fixture_stats[0]['value'] if fixture_stats[0]['identifier'] == 'minutes' else None
+                if fixture_minutes > 0: ### if the player actually played in that fixture        
                     players_fixturesPlayedPts_dict[player_id].append(fixture_pts)
                 else:
                     print(f"Player {player_id} with {fixture_stats[0]['value']} {fixture_stats[0]['identifier']} in fixture {gwFixture['fixture']}.")
