@@ -143,16 +143,17 @@ if prvGWsPtsTrendAvailability:
 
 
 ######################################################################################################################################################################################################################################################################################################################################
-def golden_sum(gold, silver=None, bronze=None):
+def golden_sum(gold, silver=None, bronze=None, symmetric=False):
     PHI = 0.61803398874989484820
     if silver is None:
         return gold
     elif bronze is None:
         return round(PHI*gold + (1-PHI)*silver, 11)
     else:
-        return golden_sum(gold, golden_sum(silver, bronze)) ### This is equivalent to returning ~(.618*gold + .236*silver + .146*bronze)~ which is not symmetric! The philosophy here is that the more valuable/important the parameter, the higher its coefficient!
-        # return golden_sum(golden_sum(gold, bronze), silver) # This is equivalent to returning ~(.382*gold + .236*bronze + .382*silver)~ which is symmetric! The philosophy here is that the 1st parameter should be goldy (gold or a gold alloy) and the 2nd parameter not goldy!
-
+        if symmetric:
+            return golden_sum(golden_sum(gold, bronze), silver) # This is equivalent to returning ~(.382*gold + .236*bronze + .382*silver)~ which is symmetric! The philosophy here is that the 1st parameter should be goldy (gold or a gold alloy) and the 2nd parameter not goldy!
+        return golden_sum(gold, golden_sum(silver, bronze))   ### This is equivalent to returning ~(.618*gold + .236*silver + .146*bronze)~ which is not symmetric! The philosophy here is that the more valuable/important the parameter, the higher its coefficient!
+         
 def calculate_avg_deviation(arr):
     mean = sum(arr) / len(arr)
     deviations = [abs(x - mean) for x in arr] ### Absolute deviations
