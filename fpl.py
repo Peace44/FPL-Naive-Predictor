@@ -8,6 +8,8 @@ import requests
 import pandas as pd
 import time
 from collections import defaultdict
+from datetime import datetime
+from datetime import timedelta
 
 general_info_url = "https://fantasy.premierleague.com/api/bootstrap-static/"
 fixtures_url = "https://fantasy.premierleague.com/api/fixtures/"
@@ -16,6 +18,15 @@ gameweeks_info_url = "https://fantasy.premierleague.com/api/event/{}/live/"
 
 response = requests.get(general_info_url)
 general_info_data = response.json()
+
+events = general_info_data['events']
+now = datetime.now()
+formReferenceGW = min(
+    [
+        event['id'] for event in events 
+        if event['finished'] and (now - (datetime.strptime(event['deadline_time'], '%Y-%m-%dT%H:%M:%SZ') + timedelta(minutes=90))) <= timedelta(days=30)
+    ]
+) ### formReferenceGW is the 1st GW to consider when calculating a player's form!
 
 teams = general_info_data['teams']
 positions = general_info_data['element_types']
@@ -26,7 +37,8 @@ positions_dict = {position['id']:position['singular_name_short'] for position in
 players_dict = {player['id']:player for player in players}
 
 
-
+# print(f"formReferenceGW = {formReferenceGW}")
+# print('\n\n\n')
 # print(teams_dict)
 # print('\n\n\n')
 # print(positions_dict)
@@ -168,9 +180,6 @@ for player in players:
         player_dict['prvGWsPtsTrend'] = '?'
     player_dict['web_name'] = player['web_name'] + f" ({player_dict['position']}, {player_dict['prvGWsPtsTrend']})"
     player_dict['tot_pts'] = player['total_points']
-    player_dict['avg_pts/fixture'] = round(player_dict['tot_pts'] / matches_played_dict[player_dict['team']], 11) ### avg_pts/fixture is a player's average score per match, calculated from all matches played by his club throughout the whole season.
-    player_dict['form'] = float64(player['form']) ### form is a player's average score per match, calculated from all matches played by his club in the last 30 days.
-    player_dict['xPts'] = golden_sum(player_dict['form'], player_dict['avg_pts/fixture']) # , player_dict['pts/match_played']) ### for more xPts accuracy ==> exclude pts/match_played!
     players_stats.append(player_dict)
 ######################################################################################################################################################################################################################################################################################################################################
 
@@ -197,17 +206,36 @@ for gw in range(1, nxtGW): ### fetch per-gameweek data for all players
                 else:
                     print(f"Player {player_id} with {fixture_stats[0]['value']} {fixture_stats[0]['identifier']} in fixture {gwFixture['fixture']}.")
 
+players_formFixturesPts_dict = {}
+for gw in range(formReferenceGW, nxtGW):
+    response = requests.get(gameweeks_info_url.format(gw))
+    gwData = response.json()
+    elements = gwData['elements']
+    for element in elements:
+        player_id = element['id']
+        if player_id not in players_formFixturesPts_dict:
+            players_formFixturesPts_dict[player_id] = []
+        gwFixtures = element['explain']
+        for gwFixture in gwFixtures: ### sometimes we have 2ble gameweeks!
+            fixture_stats = gwFixture['stats']
+            fixture_pts = sum(fixture_stat['points'] for fixture_stat in fixture_stats)
+            players_formFixturesPts_dict[player_id].append(fixture_pts)
+
 for player_dict in players_stats:
     player_id = player_dict['id']
-
     player_fixturesPlayedPts = players_fixturesPlayedPts_dict[player_id]
+    player_formFixturesPts = players_formFixturesPts_dict[player_id]
     player_dict['fixtures_played'] = len(player_fixturesPlayedPts)
     player_dict['fixtures_not_played'] = matches_played_dict[player_dict['team']] - player_dict['fixtures_played']
     player_fixturesNotPlayedPts = player_dict['fixtures_not_played'] * [0]
-    
+    player_dict['form'] = np.mean(player_formFixturesPts) ### form is a player's average score per match, calculated from all matches played by his club in the last 30 days.
+    player_dict['avg_pts/fixture'] = round(player_dict['tot_pts'] / matches_played_dict[player_dict['team']], 11) ### avg_pts/fixture is a player's average score per match, calculated from all matches played by his club throughout the whole season.
     player_dict['avg_pts/fixture_played'] = np.mean(player_fixturesPlayedPts) if len(player_fixturesPlayedPts) > 0 else 0.0
-    player_dict['MeanAbsDev(avg_pts/fixture_played)'] = calculate_avg_deviation(player_fixturesPlayedPts) if len(player_fixturesPlayedPts) > 0  else 0.0
+    player_dict['MeanAbsDev(form)'] = calculate_avg_deviation(player_formFixturesPts)
     player_dict['MeanAbsDev(avg_pts/fixture)'] = calculate_avg_deviation(player_fixturesPlayedPts + player_fixturesNotPlayedPts)
+    player_dict['MeanAbsDev(avg_pts/fixture_played)'] = calculate_avg_deviation(player_fixturesPlayedPts) if len(player_fixturesPlayedPts) > 0  else 0.0
+    player_dict['xPts'] = golden_sum(player_dict['form'], player_dict['avg_pts/fixture']) # , player_dict['pts/match_played']) ### for more xPts accuracy ==> exclude pts/match_played!
+
 
 players_df = pd.DataFrame(players_stats).set_index('id', drop=False)
 players_df = players_df.sort_values(['team', 'form', 'xPts', 'tot_pts'], ascending=[True, False, False, False]) # 'form' gives you info on which players might be currently <appearing>/<playing well> or not
