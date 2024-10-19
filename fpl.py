@@ -242,9 +242,9 @@ for player_dict in players_stats:
 players_df = pd.DataFrame(players_stats).set_index('id', drop=False)
 players_df = players_df.sort_values(['team', 'form', 'xPts', 'tot_pts'], ascending=[True, False, False, False]) # 'form' gives you info on which players might be currently <appearing>/<playing well> or not
 
-print("\n\n\n")
-print(players_df.loc[(players_df['team'] == 'MCI')].head(37).to_string(index=False))
-print("\n\n\n")
+# print("\n\n\n")
+# print(players_df.loc[(players_df['team'] == 'MCI')].head(37).to_string(index=False))
+# print("\n\n\n")
 # print(players_df.loc[(players_df['team'] == 'ARS')].head(37).to_string(index=False))
 # print("\n\n\n")
 # print(players_df.loc[(players_df['team'] == 'LIV')].head(37).to_string(index=False))
@@ -389,60 +389,28 @@ for fixture in fixtures_data: # for fixture in upcoming_fixtures_data
 
         #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
         fpl_teamsAdv_dict[home_team] = fpl_teamsAdv_dict.get(home_team, 0) + fixture_dict['home_fplAdv']
-        fpl_teamsAdv_dict[away_team] = fpl_teamsAdv_dict.get(away_team, 0) + fixture_dict['away_fplAdv']        
-        
-        # players_df.loc[players_df['team'] == home_team, '^fplAdv*xPts'] += ((9 + fixture_dict['home_fplAdv']) / 18) * players_df['xPts']
-        # players_df.loc[players_df['team'] == away_team, '^fplAdv*xPts'] += ((9 + fixture_dict['away_fplAdv']) / 18) * players_df['xPts']
+        fpl_teamsAdv_dict[away_team] = fpl_teamsAdv_dict.get(away_team, 0) + fixture_dict['away_fplAdv']
 
-        players_df.loc[players_df['team'] == home_team, '^fplAdv*xPts'] += golden_sum(
-            players_df['form'], 
-            # players_df['avg_pts/fixture'] + (fixture_dict['home_fplAdv'] / 9) * players_df['MeanAbsDev(avg_pts/fixture)'],
-            players_df['avg_pts/fixture_played'] + (fixture_dict['home_fplAdv'] / 9) * players_df['MeanAbsDev(avg_pts/fixture_played)']
-        )
-        players_df.loc[players_df['team'] == away_team, '^fplAdv*xPts'] += golden_sum(
-            players_df['form'],
-            # players_df['avg_pts/fixture'] + (fixture_dict['away_fplAdv'] / 9) * players_df['MeanAbsDev(avg_pts/fixture)'],
-            players_df['avg_pts/fixture_played'] + (fixture_dict['away_fplAdv'] / 9) * players_df['MeanAbsDev(avg_pts/fixture_played)']
-        )
+        players_df.loc[players_df['team'] == home_team, '^fplAdv*xPts'] += players_df['form'] + ((fixture_dict['home_fplAdv'] / 9) * players_df['MeanAbsDev(form)'])
+        players_df.loc[players_df['team'] == away_team, '^fplAdv*xPts'] += players_df['form'] + ((fixture_dict['away_fplAdv'] / 9) * players_df['MeanAbsDev(form)'])
         
-        ### is ^fplAdv*xPts still the best nomenclature?
+        ### is ^fplAdv*xPts still the best nomenclature? I don't think so!
         #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
         def_teamsAdv_dict[home_team] = def_teamsAdv_dict.get(home_team, 0) + fixture_dict['home_defAdv']
         def_teamsAdv_dict[away_team] = def_teamsAdv_dict.get(away_team, 0) + fixture_dict['away_defAdv']
-        
-        # players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['team'] == home_team), '^defAdv*xPts'] += ((9 + fixture_dict['home_defAdv']) / 18) * players_df['xPts']
-        # players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['team'] == away_team), '^defAdv*xPts'] += ((9 + fixture_dict['away_defAdv']) / 18) * players_df['xPts']
-        
-        players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['team'] == home_team), '^defAdv*xPts'] += golden_sum(
-            players_df['form'], 
-            # players_df['avg_pts/fixture'] + (fixture_dict['home_defAdv'] / 9) * players_df['MeanAbsDev(avg_pts/fixture)'],
-            players_df['avg_pts/fixture_played'] + (fixture_dict['home_defAdv'] / 9) * players_df['MeanAbsDev(avg_pts/fixture_played)']
-        )
-        players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['team'] == away_team), '^defAdv*xPts'] += golden_sum(
-            players_df['form'], 
-            # players_df['avg_pts/fixture'] + (fixture_dict['away_defAdv'] / 9) * players_df['MeanAbsDev(avg_pts/fixture)'],
-            players_df['avg_pts/fixture_played'] + (fixture_dict['away_defAdv'] / 9) * players_df['MeanAbsDev(avg_pts/fixture_played)']
-        )
-        ### is ^defAdv*xPts still the best nomenclature?
+
+        players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['team'] == home_team), '^defAdv*xPts'] += players_df['form'] + ((fixture_dict['home_defAdv'] / 9) * players_df['MeanAbsDev(form)'])
+        players_df.loc[((players_df['position'] == 'GKP') | (players_df['position'] == 'DEF')) & (players_df['team'] == away_team), '^defAdv*xPts'] += players_df['form'] + ((fixture_dict['away_defAdv'] / 9) * players_df['MeanAbsDev(form)'])
+
+        ### is ^defAdv*xPts still the best nomenclature? I don't think so!
         #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
         att_teamsAdv_dict[home_team] = att_teamsAdv_dict.get(home_team, 0) + fixture_dict['home_attAdv']
         att_teamsAdv_dict[away_team] = att_teamsAdv_dict.get(away_team, 0) + fixture_dict['away_attAdv']
+
+        players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['team'] == home_team), '^attAdv*xPts'] += players_df['form'] + ((fixture_dict['home_attAdv'] / 9) * players_df['MeanAbsDev(form)'])
+        players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['team'] == away_team), '^attAdv*xPts'] += players_df['form'] + ((fixture_dict['away_attAdv'] / 9) * players_df['MeanAbsDev(form)'])
         
-        # players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['team'] == home_team), '^attAdv*xPts'] += ((9 + fixture_dict['home_attAdv']) / 18) * players_df['xPts']
-        # players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['team'] == away_team), '^attAdv*xPts'] += ((9 + fixture_dict['away_attAdv']) / 18) * players_df['xPts']
-        
-        players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['team'] == home_team), '^attAdv*xPts'] += golden_sum(
-            players_df['form'], 
-            # players_df['avg_pts/fixture'] + (fixture_dict['home_attAdv'] / 9) * players_df['MeanAbsDev(avg_pts/fixture)'],
-            players_df['avg_pts/fixture_played'] + (fixture_dict['home_attAdv'] / 9) * players_df['MeanAbsDev(avg_pts/fixture_played)']
-        )
-        players_df.loc[((players_df['position'] == 'MID') | (players_df['position'] == 'FWD')) & (players_df['team'] == away_team), '^attAdv*xPts'] += golden_sum(
-            players_df['form'], 
-            # players_df['avg_pts/fixture'] + (fixture_dict['away_attAdv'] / 9) * players_df['MeanAbsDev(avg_pts/fixture)'],
-            players_df['avg_pts/fixture_played'] + (fixture_dict['away_attAdv'] / 9) * players_df['MeanAbsDev(avg_pts/fixture_played)']
-        )
-        
-        ### is ^attAdv*xPts still the best nomenclature?
+        ### is ^attAdv*xPts still the best nomenclature? I don't think so!
         #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
         teams_nxtGWsNberOfMatches_dict[home_team] = teams_nxtGWsNberOfMatches_dict.get(home_team, 0) + 1
