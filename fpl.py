@@ -153,12 +153,19 @@ def golden_sum(gold, silver=None, bronze=None, symmetric=False):
         if symmetric:
             return golden_sum(golden_sum(gold, bronze), silver) # This is equivalent to returning ~(.382*gold + .236*bronze + .382*silver)~ which is symmetric! The philosophy here is that the 1st parameter should be goldy (gold or a gold alloy) and the 2nd parameter not goldy!
         return golden_sum(gold, golden_sum(silver, bronze))   ### This is equivalent to returning ~(.618*gold + .236*silver + .146*bronze)~ which is not symmetric! The philosophy here is that the more valuable/important the parameter, the higher its coefficient!
-         
-def calculate_avg_deviation(arr):
-    mean = sum(arr) / len(arr)
-    deviations = [abs(x - mean) for x in arr] ### Absolute deviations
-    avg_dev = round(sum(deviations) / len(deviations), 11) ### Average of deviations
-    return avg_dev
+
+def calculate_central_tendency_and_deviation(arr, type="mean"):
+    if type == "median":
+        median = np.median(arr) 
+        deviations_from_median = [abs(x - median) for x in arr] ### Abs deviations from median
+        med_devs = np.median(deviations_from_median)
+        x, x_devs = [median, med_devs]
+    else:
+        mean = np.mean(arr) if len(arr) > 0 else 0.0
+        deviations_from_mean = [abs(x - mean) for x in arr] ### Absolute deviations from mean
+        mean_devs = np.mean(deviations_from_mean)
+        x, x_devs = [mean, mean_devs]
+    return [x, x_devs]
 
 def Z(series): ### Z-score of series
     return round((series - series.mean())/series.std(), 11)
@@ -230,12 +237,19 @@ for player_dict in players_stats:
     player_dict['fixtures_played'] = len(player_fixturesPlayedPts)
     player_dict['fixtures_not_played'] = matches_played_dict[player_dict['team']] - player_dict['fixtures_played']
     player_fixturesNotPlayedPts = player_dict['fixtures_not_played'] * [0]
-    player_dict['form'] = np.mean(player_formFixturesPts) ### form is a player's average score per match, calculated from all matches played by his club in the last 30 days.
-    player_dict['avg_pts/fixture'] = round(player_dict['tot_pts'] / matches_played_dict[player_dict['team']], 11) ### avg_pts/fixture is a player's average score per match, calculated from all matches played by his club throughout the whole season.
-    player_dict['avg_pts/fixture_played'] = np.mean(player_fixturesPlayedPts) if len(player_fixturesPlayedPts) > 0 else 0.0
-    player_dict['MeanAbsDev(form)'] = calculate_avg_deviation(player_formFixturesPts)
-    player_dict['MeanAbsDev(avg_pts/fixture)'] = calculate_avg_deviation(player_fixturesPlayedPts + player_fixturesNotPlayedPts)
-    player_dict['MeanAbsDev(avg_pts/fixture_played)'] = calculate_avg_deviation(player_fixturesPlayedPts) if len(player_fixturesPlayedPts) > 0  else 0.0
+    #################################################################################### REVISE THE NOMENCLATURE OF THE SECTION BELOW ####################################################################################
+    player_dict['std_form'] = np.std(player_formFixturesPts)
+    player_dict['form'], player_dict['MeanAbsDev(form)'] = calculate_central_tendency_and_deviation(player_formFixturesPts, "mean") ### form is a player's average score per match, calculated from all matches played by his club in the last 30 days.
+    player_dict['med_form'], player_dict['MedAbsDev(form)'] = calculate_central_tendency_and_deviation(player_formFixturesPts, "median")
+
+    player_dict['std_pts_dev'] = np.std(player_fixturesPlayedPts + player_fixturesNotPlayedPts)
+    player_dict['avg_pts/fixture'], player_dict['MeanAbsDev(avg_pts/fixture)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedPts + player_fixturesNotPlayedPts, "mean") ### avg_pts/fixture is a player's average score per match, calculated from all matches played by his club throughout the whole season.
+    player_dict['med_pts'], player_dict['MedAbsDev(pts)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedPts + player_fixturesNotPlayedPts, "median")
+    
+    player_dict['std_pts_dev_played'] = np.std(player_fixturesPlayedPts)
+    player_dict['avg_pts/fixture_played'], player_dict['MeanAbsDev(avg_pts/fixture_played)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedPts, "mean")
+    player_dict['med_pts_played'], player_dict['MedAbsDev(pts_played)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedPts, "median")
+    #######################################################################################################################################################################################################################
     player_dict['xPts'] = golden_sum(player_dict['form'], player_dict['avg_pts/fixture']) # , player_dict['pts/match_played']) ### for more xPts accuracy ==> exclude pts/match_played!
 
 
