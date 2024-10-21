@@ -4,8 +4,7 @@ import re
 import pandas as pd
 import math
 
-def signedRelError(aPts, xPts):
-    return (aPts - xPts)/abs(xPts)
+
 
 day = int(input("Provide the day value (1 to 31): "))
 month = int(input("Provide the month value (1 to 12): "))
