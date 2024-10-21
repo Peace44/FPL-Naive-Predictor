@@ -188,7 +188,6 @@ for player in players:
     else:
         player_dict['prvGWsPtsTrend'] = '?'
     player_dict['web_name'] = player['web_name'] + f" ({player_dict['position']}, {player_dict['prvGWsPtsTrend']})"
-    player_dict['tot_pts'] = player['total_points']
     players_stats.append(player_dict)
 ######################################################################################################################################################################################################################################################################################################################################
 
@@ -234,10 +233,11 @@ for gw in range(formReferenceGW, nxtGW):
 for player_dict in players_stats:
     player_id = player_dict['id']
     player_fixturesPlayedPts = players_fixturesPlayedPts_dict[player_id]
-    player_formFixturesPts = players_formFixturesPts_dict[player_id]
+    player_dict['tot_pts'] = np.sum(player_fixturesPlayedPts, dtype=int)
     player_dict['fixtures_played'] = len(player_fixturesPlayedPts)
     player_dict['fixtures_not_played'] = matches_played_dict[player_dict['team']] - player_dict['fixtures_played']
     player_fixturesNotPlayedPts = player_dict['fixtures_not_played'] * [0]
+    player_formFixturesPts = players_formFixturesPts_dict[player_id]
     #################################################################################### REVISE THE NOMENCLATURE OF THE SECTION BELOW ####################################################################################
     player_dict['std_form'] = np.std(player_formFixturesPts) if len(player_formFixturesPts) > 0 else 0
     player_dict['form'], player_dict['MeanAbsDev(form)'] = calculate_central_tendency_and_deviation(player_formFixturesPts, "mean") ### form is a player's average score per match, calculated from all matches played by his club in the last 30 days.
