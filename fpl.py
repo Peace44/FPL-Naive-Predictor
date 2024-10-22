@@ -658,14 +658,14 @@ print("\n\n\n")
 
 
 ######################################################################################################################################################################################################################################################################################################################################
-def best_team_str(best_team, selection_criterion):
+def best_team_str(selection_criterion, best_points, best_team):
     ans = ""
 
     grouped_team = defaultdict(list)
     for player in best_team:
         grouped_team[player["position"]].append(player)
 
-    ans += f"\nBEST TEAM according to {selection_criterion}:\n"
+    ans += f"\nBEST TEAM according to {selection_criterion} (Total " + selection_criterion + ": " + f"{best_points:.11f}):\n"
     ans += "####################################################################################################################################################################################################################\n"
     for position, players in grouped_team.items():
         str1 = f"#     {position}: "
@@ -727,8 +727,6 @@ def select_best_team(players, selection_criterion):
         if criterion_points > best_points:
             best_points = criterion_points
             best_formation = formation
-
-    print("\nTotal " + selection_criterion + ": " + f"{best_points:.5f}") 
     
     # Select the team based on the best formation
     best_team = (
@@ -738,7 +736,13 @@ def select_best_team(players, selection_criterion):
         forwards[:best_formation[2]]
     )
 
-    return best_team
+    ans = {
+        "selection_criterion": selection_criterion,
+        "best_points": best_points,
+        "best_team": best_team
+    }
+
+    return ans
 
 
 
@@ -751,24 +755,28 @@ def select_best_team(players, selection_criterion):
 teams_selections_str = ""
 
 print("Selected Team according to FPL advantage:")
-best_team = select_best_team(teams_top_fpl_players_df_dict.values(), '^fplAdv*xPts')
-print(best_team_str(best_team, '^fplAdv*xPts'))
-teams_selections_str += best_team_str(best_team, '^fplAdv*xPts')
+criterion, best_pts, best_team = select_best_team(teams_top_fpl_players_df_dict.values(), '^fplAdv*xPts').values()
+best_team_str_repr = best_team_str(criterion, best_pts, best_team)
+print(best_team_str_repr)
+teams_selections_str += best_team_str_repr
 
 print("Selected Team according to DEFensive advantage:")
-best_team = select_best_team(teams_top_defensive_players_df_dict.values(), '^defAdv*xPts')
-print(best_team_str(best_team, '^defAdv*xPts'))
-teams_selections_str += best_team_str(best_team, '^defAdv*xPts')
+criterion, best_pts, best_team = select_best_team(teams_top_defensive_players_df_dict.values(), '^defAdv*xPts').values()
+best_team_str_repr = best_team_str(criterion, best_pts, best_team)
+print(best_team_str_repr)
+teams_selections_str += best_team_str_repr
 
 print("Selected Team according to ATTacking advantage:")
-best_team = select_best_team(teams_top_attacking_players_df_dict.values(), '^attAdv*xPts')
-print(best_team_str(best_team, '^attAdv*xPts'))
-teams_selections_str += best_team_str(best_team, '^attAdv*xPts')
+criterion, best_pts, best_team = select_best_team(teams_top_attacking_players_df_dict.values(), '^attAdv*xPts').values()
+best_team_str_repr = best_team_str(criterion, best_pts, best_team)
+print(best_team_str_repr)
+teams_selections_str += best_team_str_repr
 
 print("Selected Team according to AVeraGe advantage:")
-best_team = select_best_team(teams_top_players_df_dict.values(), '^avgAdv*xPts')
-print(best_team_str(best_team, '^avgAdv*xPts'))
-teams_selections_str += best_team_str(best_team, '^avgAdv*xPts')
+criterion, best_pts, best_team = select_best_team(teams_top_players_df_dict.values(), '^avgAdv*xPts').values()
+best_team_str_repr = best_team_str(criterion, best_pts, best_team)
+print(best_team_str_repr)
+teams_selections_str += best_team_str_repr
 ######################################################################################################################################################################################################################################################################################################################################
 
 

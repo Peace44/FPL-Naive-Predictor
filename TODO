@@ -1,4 +1,4 @@
 + In fpl.py, in order to be able to benchmark/test the quality of different prediction strategies for past/finished gameweeks, I should add an option that only considers relevant data up to that point in time!
 - Thoroughly test (1)
 - Revise the nomenclature from lines (240, 252)
-- add the total references to selected_teams.txt (example: Total ^fplAdv*xPts: 100.27200)
++ add the total references to selected_teams.txt (example: Total ^fplAdv*xPts: 100.27200)
