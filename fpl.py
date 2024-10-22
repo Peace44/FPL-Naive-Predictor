@@ -754,25 +754,25 @@ def select_best_team(players, selection_criterion):
 
 teams_selections_str = ""
 
-print("Selected Team according to FPL advantage:")
+# print("Selected Team according to FPL advantage:")
 criterion, best_pts, best_team = select_best_team(teams_top_fpl_players_df_dict.values(), '^fplAdv*xPts').values()
 best_team_str_repr = best_team_str(criterion, best_pts, best_team)
 print(best_team_str_repr)
 teams_selections_str += best_team_str_repr
 
-print("Selected Team according to DEFensive advantage:")
+# print("Selected Team according to DEFensive advantage:")
 criterion, best_pts, best_team = select_best_team(teams_top_defensive_players_df_dict.values(), '^defAdv*xPts').values()
 best_team_str_repr = best_team_str(criterion, best_pts, best_team)
 print(best_team_str_repr)
 teams_selections_str += best_team_str_repr
 
-print("Selected Team according to ATTacking advantage:")
+# print("Selected Team according to ATTacking advantage:")
 criterion, best_pts, best_team = select_best_team(teams_top_attacking_players_df_dict.values(), '^attAdv*xPts').values()
 best_team_str_repr = best_team_str(criterion, best_pts, best_team)
 print(best_team_str_repr)
 teams_selections_str += best_team_str_repr
 
-print("Selected Team according to AVeraGe advantage:")
+# print("Selected Team according to AVeraGe advantage:")
 criterion, best_pts, best_team = select_best_team(teams_top_players_df_dict.values(), '^avgAdv*xPts').values()
 best_team_str_repr = best_team_str(criterion, best_pts, best_team)
 print(best_team_str_repr)
