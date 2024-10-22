@@ -19,15 +19,6 @@ gameweeks_info_url = "https://fantasy.premierleague.com/api/event/{}/live/"
 response = requests.get(general_info_url)
 general_info_data = response.json()
 
-events = general_info_data['events']
-now = datetime.now()
-formReferenceGW = min(
-    [
-        event['id'] for event in events 
-        if event['finished'] and (now - (datetime.strptime(event['deadline_time'], '%Y-%m-%dT%H:%M:%SZ') + timedelta(minutes=90))) <= timedelta(days=30)
-    ]
-) ### formReferenceGW is the 1st GW to consider when calculating a player's form!
-
 teams = general_info_data['teams']
 positions = general_info_data['element_types']
 players = general_info_data['elements']
@@ -37,13 +28,55 @@ positions_dict = {position['id']:position['singular_name_short'] for position in
 players_dict = {player['id']:player for player in players}
 
 # print('\n\n\n')
-# print(f"formReferenceGW = {formReferenceGW}")
-# print('\n\n\n')
 # print(teams_dict)
 # print('\n\n\n')
 # print(positions_dict)
 # print('\n\n\n')
 # print(players_dict)
+# print('\n\n\n')
+######################################################################################################################################################################################################################################################################################################################################
+
+
+
+######################################################################################################################################################################################################################################################################################################################################
+response = requests.get(upcoming_fixtures_url)
+upcoming_fixtures_data = response.json()
+nxtGW = upcoming_fixtures_data[0]['event']
+print(f"\n\n\nThe next gameweek is GW{nxtGW}\n")
+
+gws = []
+if input(f"Do you want to simulate a particular gameweek?\nAnswer 'no' if you want to simulate in advance many contiguous gameweeks starting from the next.\n[Y/n]?   ").lower()[0] == 'y':
+    gwToSimulate = int(input(f"\nWhich one? Enter a number in the range [1, 38]:    "))
+    gws.append(gwToSimulate)
+else:
+    nberOfGWsInAdvance = int(input(f"\nHow many gameweeks do you want to simulate in advance ( <= 5 )?   "))
+    if nberOfGWsInAdvance not in range(1, 5+1):
+        sys.exit("\n\n\n    !Bye-\n-Bye!\n\n\n")
+    gws.append(nxtGW) 
+    if nberOfGWsInAdvance >= 2:
+        gws.append(nxtGW + 1)
+    if nberOfGWsInAdvance >= 3:
+        gws.append(nxtGW + 2)
+    if nberOfGWsInAdvance >= 4:
+        gws.append(nxtGW + 3)
+    if nberOfGWsInAdvance == 5:
+        gws.append(nxtGW + 4)
+
+refGW = min(gws)
+events = general_info_data['events']
+refGWstart = datetime.strptime(events[refGW-1]['deadline_time'], '%Y-%m-%dT%H:%M:%SZ') + timedelta(minutes=90)
+form_refGW = min(
+    [
+        event['id'] 
+        for event in events 
+        if event['finished'] and (refGWstart - (datetime.strptime(event['deadline_time'], '%Y-%m-%dT%H:%M:%SZ') + timedelta(minutes=90))) <= timedelta(days=30)
+    ]
+) ### form_refGW is the 1st GW to consider when calculating a player's form!
+form_refGWstart = datetime.strptime(events[form_refGW-1]['deadline_time'], '%Y-%m-%dT%H:%M:%SZ') + timedelta(minutes=90)
+
+# print('\n\n\n')
+# print(f"nxtGW = {nxtGW}\nrefGW = {refGW}\nform_refGW = {form_refGW}")
+# print(f"{refGWstart-form_refGWstart}")
 # print('\n\n\n')
 ######################################################################################################################################################################################################################################################################################################################################
 
@@ -58,7 +91,7 @@ goals_for_dict = {}
 goals_against_dict = {}
 clean_sheets_dict= {}
 for fixture in fixtures_data:
-    if not fixture["finished"]:
+    if not fixture["finished"] or fixture["event"] >= max(gws):
         continue;
 
     home_team = teams_dict[fixture["team_h"]]
@@ -106,13 +139,8 @@ for fixture in fixtures_data:
 
 
 ######################################################################################################################################################################################################################################################################################################################################
-response = requests.get(upcoming_fixtures_url)
-upcoming_fixtures_data = response.json()
-
-nxtGW = upcoming_fixtures_data[0]["event"]
-
 prvGWsPtsTrendAvailability = False
-if input(f"Do you have previous gameweeks (nxtGWs)PtsTrends data [Y/n]?   ").lower()[0] == 'y':
+if input(f"\n\n\nDo you have previous gameweeks (nxtGWs)PtsTrends data [Y/n]?   ").lower()[0] == 'y':
     prvGWsPtsTrendAvailability = True
 
 if prvGWsPtsTrendAvailability:
@@ -122,18 +150,14 @@ if prvGWsPtsTrendAvailability:
     year = int(input("Provide the year value: "))
     hour = int(input("Provide the hour value (0 to 23): "))
     minute = int(input("Provide the minute value (0 to 59): "))
-
     timestr = "%02d'%02d'%4d-%02d:%02d" %(day, month, year, hour, minute)
     prvGWsPtsTrend_file = "data/" + timestr + "/players_stats.csv"
-
     try:
         prvGWsPtsTrend_df = pd.read_csv(prvGWsPtsTrend_file)[['id', 'nxtGWsPtsTrend']].set_index('id', drop=False)
         prvGWsPtsTrend_dict = prvGWsPtsTrend_df.to_dict()['nxtGWsPtsTrend']
     except Exception as e:
         print(f"\n{e}\n")
         prvGWsPtsTrendAvailability = False
-
-
 
 # print('\n\n\n')
 # print(prvGWsPtsTrend_dict)
@@ -195,7 +219,7 @@ for player in players:
 
 ######################################################################################################################################################################################################################################################################################################################################
 players_fixturesPlayedPts_dict = {}
-for gw in range(1, nxtGW): ### fetch per-gameweek data for all players
+for gw in range(1, refGW): ### fetch per-gameweek data for all players
     response = requests.get(gameweeks_info_url.format(gw))
     gwData = response.json()
     elements = gwData['elements']
@@ -216,7 +240,7 @@ for gw in range(1, nxtGW): ### fetch per-gameweek data for all players
                     print(f"Player {player_id} with {fixture_stats[0]['value']} {fixture_stats[0]['identifier']} in fixture {gwFixture['fixture']}.")
 
 players_formFixturesPts_dict = {}
-for gw in range(formReferenceGW, nxtGW):
+for gw in range(form_refGW, refGW):
     response = requests.get(gameweeks_info_url.format(gw))
     gwData = response.json()
     elements = gwData['elements']
@@ -232,12 +256,12 @@ for gw in range(formReferenceGW, nxtGW):
 
 for player_dict in players_stats:
     player_id = player_dict['id']
-    player_fixturesPlayedPts = players_fixturesPlayedPts_dict[player_id]
+    player_fixturesPlayedPts = players_fixturesPlayedPts_dict.get(player_id, [])
     player_dict['tot_pts'] = np.sum(player_fixturesPlayedPts, dtype=int)
     player_dict['fixtures_played'] = len(player_fixturesPlayedPts)
     player_dict['fixtures_not_played'] = matches_played_dict[player_dict['team']] - player_dict['fixtures_played']
     player_fixturesNotPlayedPts = player_dict['fixtures_not_played'] * [0]
-    player_formFixturesPts = players_formFixturesPts_dict[player_id]
+    player_formFixturesPts = players_formFixturesPts_dict.get(player_id, [])
     #################################################################################### REVISE THE NOMENCLATURE OF THE SECTION BELOW ####################################################################################
     player_dict['std_form'] = np.std(player_formFixturesPts) if len(player_formFixturesPts) > 0 else 0
     player_dict['form'], player_dict['MeanAbsDev(form)'] = calculate_central_tendency_and_deviation(player_formFixturesPts, "mean") ### form is a player's average score per match, calculated from all matches played by his club in the last 30 days.
@@ -348,29 +372,6 @@ att_teams_stats_df = att_teams_stats_df.set_index('team', drop=False)
 
 
 ######################################################################################################################################################################################################################################################################################################################################
-print(f"\n\n\nThe next gameweek is GW{nxtGW}\n")
-
-gws = []
-
-if input(f"Do you want to simulate a particular gameweek?\nAnswer 'no' if you want to simulate in advance many contiguous gameweeks starting from the next.\n[Y/n]?   ").lower()[0] == 'y':
-    gwToSimulate = int(input(f"\nWhich one? Enter a number in the range [1, 38]:    ")) # int(input(f"\nWhich one? Enter a number in the range [{nxtGW}, 38]:    "))
-    gws.append(gwToSimulate)
-else:
-    nberOfGWsInAdvance = int(input(f"\nHow many gameweeks do you want to simulate in advance ( <= 5 )?   "))
-    if nberOfGWsInAdvance not in range(1, 5+1):
-        sys.exit("\n\n\n    !Bye-\n-Bye!\n\n\n")
-
-    gws.append(nxtGW) 
-
-    if nberOfGWsInAdvance >= 2:
-        gws.append(nxtGW + 1)
-    if nberOfGWsInAdvance >= 3:
-        gws.append(nxtGW + 2)
-    if nberOfGWsInAdvance >= 4:
-        gws.append(nxtGW + 3)
-    if nberOfGWsInAdvance == 5:
-        gws.append(nxtGW + 4)
-
 nxtGWs_fixtures = []
 fpl_teamsAdv_dict = {}
 def_teamsAdv_dict = {}
