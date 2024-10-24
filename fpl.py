@@ -46,7 +46,7 @@ print(f"\n\n\nThe next gameweek is GW{nxtGW}\n")
 
 gws = []
 if input(f"Do you want to simulate a particular gameweek?\nAnswer 'no' if you want to simulate in advance many contiguous gameweeks starting from the next.\n[Y/n]?   ").lower()[0] == 'y':
-    gwToSimulate = int(input(f"\nWhich one? Enter a number in the range [1, 38]:    "))
+    gwToSimulate = int(input(f"\nWhich one? Enter a number in the range [1, {nxtGW}]:    "))
     gws.append(gwToSimulate)
 else:
     nberOfGWsInAdvance = int(input(f"\nHow many gameweeks do you want to simulate in advance ( <= 5 )?   "))
@@ -86,10 +86,11 @@ form_refGWstart = datetime.strptime(events[form_refGW-1]['deadline_time'], '%Y-%
 response = requests.get(fixtures_url)
 fixtures_data = response.json()
 
-matches_played_dict = {}
-goals_for_dict = {}
-goals_against_dict = {}
-clean_sheets_dict= {}
+matches_played_dict = {k:0 for k in teams_dict.values()}
+goals_for_dict = {k:0 for k in teams_dict.values()}
+goals_against_dict = {k:0 for k in teams_dict.values()}
+clean_sheets_dict= {k:0 for k in teams_dict.values()}
+
 for fixture in fixtures_data:
     if not fixture["finished"] or fixture["event"] >= max(gws):
         continue;
@@ -99,12 +100,6 @@ for fixture in fixtures_data:
 
     home_team_score = fixture["team_h_score"]
     away_team_score = fixture["team_a_score"]
-    
-    if home_team not in matches_played_dict:
-        matches_played_dict[home_team] = 0
-        goals_for_dict[home_team] = 0
-        goals_against_dict[home_team] = 0
-        clean_sheets_dict[home_team] = 0
 
     matches_played_dict[home_team] += 1
     goals_for_dict[home_team] += home_team_score
@@ -112,12 +107,6 @@ for fixture in fixtures_data:
 
     if away_team_score == 0:
         clean_sheets_dict[home_team] += 1
-
-    if away_team not in matches_played_dict:
-        matches_played_dict[away_team] = 0
-        goals_for_dict[away_team] = 0
-        goals_against_dict[away_team] = 0
-        clean_sheets_dict[away_team] = 0
         
     matches_played_dict[away_team] += 1
     goals_for_dict[away_team] += away_team_score
@@ -659,8 +648,11 @@ print("\n\n\n")
 
 ######################################################################################################################################################################################################################################################################################################################################
 def best_team_str(selection_criterion, best_points, best_team):
+    if best_team is None:
+        return f"\nTHERE'S NO BEST TEAM according to {selection_criterion}!\n"
+    
     ans = ""
-
+    
     grouped_team = defaultdict(list)
     for player in best_team:
         grouped_team[player["position"]].append(player)
@@ -708,8 +700,8 @@ def select_best_team(players, selection_criterion):
     formations = [
         (3, 4, 3),
         (3, 5, 2),
-        (4, 4, 2),
         (4, 3, 3),
+        (4, 4, 2),
         (4, 5, 1),
         (5, 3, 2),
         (5, 4, 1),
@@ -734,7 +726,7 @@ def select_best_team(players, selection_criterion):
         defenders[:best_formation[0]] +
         midfielders[:best_formation[1]] +
         forwards[:best_formation[2]]
-    )
+    ) if best_formation is not None else None
 
     ans = {
         "selection_criterion": selection_criterion,
@@ -793,7 +785,7 @@ def print_to_file(string_to_print, file):
 
 
 
-if input(f"Do you wish to save the results of this fpl simulation/analysis inside the folder '{folder}'  [Y/n]?   ").lower()[0] == 'y':
+if input(f"\n\n\nDo you wish to save the results of this fpl simulation/analysis inside the folder '{folder}'  [Y/n]?   ").lower()[0] == 'y':
     folder_path = os.path.join(os.getcwd(), folder)
     os.mkdir(folder_path)
 
