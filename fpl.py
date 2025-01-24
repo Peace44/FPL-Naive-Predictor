@@ -691,7 +691,7 @@ for player_dict in players_stats:
                 ijk_str = (j + '_' + ik_str) if (j == 'med' or j == 'avg') else (j + '(' + ik_str + ')')
                 x = player_dict[ijk_str]
                 y = (k == 'MP') * golden_sum(x/180 * (x/30 + 1), math.ceil(x/180 * (x/30 + 1))) ### math.ceil(x/180 * (x/30 + 1)) <==> (x > 0 and x < 60) * 1 + (x >= 60) * 2) ### The 1st param of golden_sum is smooth while the 2nd is rough! Smoother is better than Rougher! Also it's easier to underperform than to overperform (1stParam <= 2ndParam)!
-                ijk_pts = (x * action_pts_dict[player_position][k]) if (k != 'MP') else (y)
+                ijk_pts = (x * action_pts_dict.get(player_position, {}).get(k,0)) if (k != 'MP') else (y)
                 if j == 'MedAbsDev' or j == 'MeanAbsDev' or j == 'StdDev':
                     ijk_pts = abs(ijk_pts)
                 ij_pts += ijk_pts
