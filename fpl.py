@@ -679,7 +679,7 @@ for player_dict in players_stats:
     player_position = player_dict['position']
     
     #-------------------------------------------------------------------------------------------------#
-    print(player_dict['web_name'])
+    # print(player_dict['web_name'])
     #-------------------------------------------------------------------------------------------------#
     for i in ['form', '/fxtr', '/fxtr_plyd']:    
         for j in ['med', 'MedAbsDev', 'avg', 'MeanAbsDev', 'StdDev']:
@@ -691,19 +691,19 @@ for player_dict in players_stats:
                 ijk_str = (j + '_' + ik_str) if (j == 'med' or j == 'avg') else (j + '(' + ik_str + ')')
                 x = player_dict[ijk_str]
                 y = (k == 'MP') * golden_sum(x/180 * (x/30 + 1), math.ceil(x/180 * (x/30 + 1))) ### math.ceil(x/180 * (x/30 + 1)) <==> (x > 0 and x < 60) * 1 + (x >= 60) * 2) ### The 1st param of golden_sum is smooth while the 2nd is rough! Smoother is better than Rougher! Also it's easier to underperform than to overperform (1stParam <= 2ndParam)!
-                ijk_pts = (x * action_pts_dict[player_position][k]) if (k != 'MP') else (y)
+                ijk_pts = (x * action_pts_dict.get(player_position, {}).get(k,0)) if (k != 'MP') else (y)
                 if j == 'MedAbsDev' or j == 'MeanAbsDev' or j == 'StdDev':
                     ijk_pts = abs(ijk_pts)
                 ij_pts += ijk_pts
                 #-------------------------------------------------------------------------------------------------#
-                print(ijk_str + ':\t\t' + str(x) + "\t==>\t" + str(ijk_pts) + ' pts')
+                # print(ijk_str + ':\t\t' + str(x) + "\t==>\t" + str(ijk_pts) + ' pts')
                 #-------------------------------------------------------------------------------------------------#
             player_dict[ij_str] = ij_pts
             #-------------------------------------------------------------------------------------------------#
-            print(ij_str + ':\t\t\t==>\t' + str(ij_pts) + ' pts')
-            abc = ((j + '_' + i_str) if (j == 'med' or j == 'avg') else (j + '(' + i_str + ')'))
-            print(abc + ':\t\t\t==>\t' + str(player_dict[abc]) + ' pts')
-            input()
+            # print(ij_str + ':\t\t\t==>\t' + str(ij_pts) + ' pts')
+            # abc = ((j + '_' + i_str) if (j == 'med' or j == 'avg') else (j + '(' + i_str + ')'))
+            # print(abc + ':\t\t\t==>\t' + str(player_dict[abc]) + ' pts')
+            # input()
             #-------------------------------------------------------------------------------------------------#
 
 players_df = pd.DataFrame(players_stats).set_index('id', drop=False)
@@ -864,7 +864,7 @@ teams_stats_df['att_pts'] = teams_stats_df['team'].map(lambda team: np.sum(teams
 teams_stats_df['att_avg_pts/match'] = teams_stats_df['team'].map(lambda team: np.mean(teams_fixturesAttPts_dict.get(team, [])))
 teams_stats_df['att_avg_form'] = teams_stats_df['team'].map(lambda team: np.mean(teams_formFixturesAttPts_dict.get(team, [])))
 teams_stats_df['att_avg_xPts'] = golden_sum(teams_stats_df['att_avg_pts/match'], teams_stats_df['att_avg_form'])
-teams_stats_df['Z(att_avg_xPts)'] = Z(teams_stats_df['att_avg_xPts']) ### Z-score of att_avg_xPts
+teams_stats_df['Z(att_avg_xPts)'] = Z(teams_stats_df['att_avg_xPts'])
 
 teams_stats_df['att_med_pts/match'] = teams_stats_df['team'].map(lambda team: np.median(teams_fixturesAttPts_dict.get(team, [])))
 teams_stats_df['att_med_form'] = teams_stats_df['team'].map(lambda team: np.median(teams_formFixturesAttPts_dict.get(team, [])))
@@ -1111,12 +1111,12 @@ for fixture in fixtures_data: # for fixture in upcoming_fixtures_data
         #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
         #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-        fplHomeAdv_playerGoldenSum_xPtsParam1 = players_df['x(med_pts/fxtr)'] + (fixture_dict['home_fplAdv'] / 9) * players_df['x(MedAbsDev(pts/fxtr))']
-        fplAwayAdv_playerGoldenSum_xPtsParam1 = players_df['x(med_pts/fxtr)'] + (fixture_dict['away_fplAdv'] / 9) * players_df['x(MedAbsDev(pts/fxtr))']
-        defHomeAdv_playerGoldenSum_xPtsParam1 = players_df['x(med_pts/fxtr)'] + (fixture_dict['home_defAdv'] / 9) * players_df['x(MedAbsDev(pts/fxtr))']
-        defAwayAdv_playerGoldenSum_xPtsParam1 = players_df['x(med_pts/fxtr)'] + (fixture_dict['away_defAdv'] / 9) * players_df['x(MedAbsDev(pts/fxtr))']
-        attHomeAdv_playerGoldenSum_xPtsParam1 = players_df['x(med_pts/fxtr)'] + (fixture_dict['home_attAdv'] / 9) * players_df['x(MedAbsDev(pts/fxtr))']
-        attAwayAdv_playerGoldenSum_xPtsParam1 = players_df['x(med_pts/fxtr)'] + (fixture_dict['away_attAdv'] / 9) * players_df['x(MedAbsDev(pts/fxtr))']
+        fplHomeAdv_playerGoldenSum_xPtsParam1 = players_df['x(med_pts/fxtr)'] + (fixture_dict['home_fplAdv'] / 9) * players_df['MedAbsDev(pts/fxtr)']
+        fplAwayAdv_playerGoldenSum_xPtsParam1 = players_df['x(med_pts/fxtr)'] + (fixture_dict['away_fplAdv'] / 9) * players_df['MedAbsDev(pts/fxtr)']
+        defHomeAdv_playerGoldenSum_xPtsParam1 = players_df['x(med_pts/fxtr)'] + (fixture_dict['home_defAdv'] / 9) * players_df['MedAbsDev(pts/fxtr)']
+        defAwayAdv_playerGoldenSum_xPtsParam1 = players_df['x(med_pts/fxtr)'] + (fixture_dict['away_defAdv'] / 9) * players_df['MedAbsDev(pts/fxtr)']
+        attHomeAdv_playerGoldenSum_xPtsParam1 = players_df['x(med_pts/fxtr)'] + (fixture_dict['home_attAdv'] / 9) * players_df['MedAbsDev(pts/fxtr)']
+        attAwayAdv_playerGoldenSum_xPtsParam1 = players_df['x(med_pts/fxtr)'] + (fixture_dict['away_attAdv'] / 9) * players_df['MedAbsDev(pts/fxtr)']
         #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
         fplHomeAdv_playerGoldenSum_xPtsParam2 = None
         fplAwayAdv_playerGoldenSum_xPtsParam2 = None
