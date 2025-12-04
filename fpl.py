@@ -264,6 +264,7 @@ players_fixturesPenaltiesMissed_dict = {}
 players_fixturesYellowCards_dict = {}
 players_fixturesRedCards_dict = {}
 players_fixturesBonus_dict = {}
+players_fixturesDefensiveContribution_dict = {}
 
 for gw in range(1, refGW): ### fetch per-gameweek data for all players
     response = requests.get(gameweeks_info_url.format(gw))
@@ -285,6 +286,7 @@ for gw in range(1, refGW): ### fetch per-gameweek data for all players
             players_fixturesYellowCards_dict[player_id] = [[],[]]
             players_fixturesRedCards_dict[player_id] = [[],[]]
             players_fixturesBonus_dict[player_id] = [[],[]]
+            players_fixturesDefensiveContribution_dict[player_id] = [[],[]]
         player_team = teams_dict[players_dict[player_id]['team']]
         player_position = positions_dict[players_dict[player_id]['element_type']]
         element_stats = element['stats']
@@ -303,6 +305,7 @@ for gw in range(1, refGW): ### fetch per-gameweek data for all players
             players_fixturesYellowCards_dict[player_id][0].append(None) if gw < form_refGW else players_fixturesYellowCards_dict[player_id][1].append(None)
             players_fixturesRedCards_dict[player_id][0].append(None) if gw < form_refGW else players_fixturesRedCards_dict[player_id][1].append(None)
             players_fixturesBonus_dict[player_id][0].append(None) if gw < form_refGW else players_fixturesBonus_dict[player_id][1].append(None)
+            players_fixturesDefensiveContribution_dict[player_id][0].append(None) if gw < form_refGW else players_fixturesDefensiveContribution_dict[player_id][1].append(None)
         else:
             gwFixtures = element['explain']
             for gwFixture in gwFixtures: ### sometimes we have 2ble gameweeks!
@@ -322,6 +325,7 @@ for gw in range(1, refGW): ### fetch per-gameweek data for all players
                 fixture_yellow_cards = element_stats['yellow_cards']
                 fixture_red_cards = element_stats['red_cards']
                 fixture_bonus = element_stats['bonus']
+                fixture_defensive_contribution = element_stats['defensive_contribution']
                 #-------THE CODE ABOVE CAN ONLY WORK BEFORE THERE ARE 2BLE GAMEWEEKS-------------------------------#
                 if fixture_minutes > 0: ### if the player actually played in that fixture        
                     players_fixturesPts_dict[player_id][0].append(fixture_pts) if gw < form_refGW else players_fixturesPts_dict[player_id][1].append(fixture_pts)
@@ -337,6 +341,7 @@ for gw in range(1, refGW): ### fetch per-gameweek data for all players
                     players_fixturesYellowCards_dict[player_id][0].append(fixture_yellow_cards) if gw < form_refGW else players_fixturesYellowCards_dict[player_id][1].append(fixture_yellow_cards)
                     players_fixturesRedCards_dict[player_id][0].append(fixture_red_cards) if gw < form_refGW else players_fixturesRedCards_dict[player_id][1].append(fixture_red_cards)
                     players_fixturesBonus_dict[player_id][0].append(fixture_bonus) if gw < form_refGW else players_fixturesBonus_dict[player_id][1].append(fixture_bonus)
+                    players_fixturesDefensiveContribution_dict[player_id][0].append(fixture_defensive_contribution) if gw < form_refGW else players_fixturesDefensiveContribution_dict[player_id][1].append(fixture_defensive_contribution)
                 else:
                     players_fixturesPts_dict[player_id][0].append(None) if gw < form_refGW else players_fixturesPts_dict[player_id][1].append(None)
                     players_fixturesMinutes_dict[player_id][0].append(None) if gw < form_refGW else players_fixturesMinutes_dict[player_id][1].append(None)
@@ -351,6 +356,7 @@ for gw in range(1, refGW): ### fetch per-gameweek data for all players
                     players_fixturesYellowCards_dict[player_id][0].append(None) if gw < form_refGW else players_fixturesYellowCards_dict[player_id][1].append(None)
                     players_fixturesRedCards_dict[player_id][0].append(None) if gw < form_refGW else players_fixturesRedCards_dict[player_id][1].append(None)
                     players_fixturesBonus_dict[player_id][0].append(None) if gw < form_refGW else players_fixturesBonus_dict[player_id][1].append(None)
+                    players_fixturesDefensiveContribution_dict[player_id][0].append(None) if gw < form_refGW else players_fixturesDefensiveContribution_dict[player_id][1].append(None)
                 if fixture_id in teams_fixturesPtsFor_dict[player_team][gw-1]:
                     teams_fixturesPtsFor_dict[player_team][gw-1][fixture_id] += fixture_pts
                     (teams_fixturesDefPts_dict if player_position in ['GKP', 'DEF'] else teams_fixturesAttPts_dict)[player_team][gw-1][fixture_id] += fixture_pts
@@ -368,6 +374,7 @@ players_fixturesPlayedPenaltiesMissed_dict = {player_id: [pm for pm in (fixtures
 players_fixturesPlayedYellowCards_dict = {player_id: [ycs for ycs in (fixturesYCS[0] + fixturesYCS[1]) if ycs is not None] for player_id, fixturesYCS in players_fixturesYellowCards_dict.items()}
 players_fixturesPlayedRedCards_dict = {player_id: [rcs for rcs in (fixturesRCS[0] + fixturesRCS[1]) if rcs is not None] for player_id, fixturesRCS in players_fixturesRedCards_dict.items()}
 players_fixturesPlayedBonus_dict = {player_id: [bpts for bpts in (fixturesBPts[0] + fixturesBPts[1]) if bpts is not None] for player_id, fixturesBPts in players_fixturesBonus_dict.items()}
+players_fixturesPlayedDefensiveContribution_dict = {player_id: [dc for dc in (fixturesDC[0] + fixturesDC[1]) if dc is not None] for player_id, fixturesDC in players_fixturesDefensiveContribution_dict.items()}
 
 players_formFixturesPts_dict = {player_id: [0 if pts is None else pts for pts in fixturesPts[1]] for player_id, fixturesPts in players_fixturesPts_dict.items()}
 players_formFixturesMinutes_dict = {player_id: [0 if mins is None else mins for mins in fixturesMins[1]] for player_id, fixturesMins in players_fixturesMinutes_dict.items()}
@@ -382,6 +389,7 @@ players_formFixturesPenaltiesMissed_dict = {player_id: [0 if pm is None else pm 
 players_formFixturesYellowCards_dict = {player_id: [0 if ycs is None else ycs for ycs in fixturesYCS[1]] for player_id, fixturesYCS in players_fixturesYellowCards_dict.items()}
 players_formFixturesRedCards_dict = {player_id: [0 if rcs is None else rcs for rcs in fixturesRCS[1]] for player_id, fixturesRCS in players_fixturesRedCards_dict.items()}
 players_formFixturesBonus_dict = {player_id: [0 if bpts is None else bpts for bpts in fixturesBPts[1]] for player_id, fixturesBPts in players_fixturesBonus_dict.items()}
+players_formFixturesDefensiveContribution_dict = {player_id: [0 if dc is None else dc for dc in fixturesDC[1]] for player_id, fixturesDC in players_fixturesDefensiveContribution_dict.items()}
 
 #---------------------------------------------------------------------------------------------------------#
 gkp_GS_pts = 10
@@ -402,6 +410,10 @@ fwd_CS_pts = 0
 #---------------------------------------------------------------------------------------------------------#
 gkp_S_pts = 1/3
 def_S_pts = mid_S_pts = fwd_S_pts = 0
+#---------------------------------------------------------------------------------------------------------#
+gkp_DC_pts = 0
+def_DC_pts = 1/5
+mid_DC_pts = fwd_DC_pts = 1/6
 #---------------------------------------------------------------------------------------------------------#
 gkp_PS_pts = def_PS_pts = mid_PS_pts = fwd_PS_pts = 5
 #---------------------------------------------------------------------------------------------------------#
@@ -426,7 +438,8 @@ action_pts_dict = {
         'PM':   gkp_PM_pts, 
         'YC':   gkp_YC_pts, 
         'RC':   gkp_RC_pts,
-        'BP':   gkp_BP_pts
+        'BP':   gkp_BP_pts,
+        'DC':   gkp_DC_pts
     },
     'DEF': {
         'GS':   def_GS_pts, 
@@ -439,7 +452,8 @@ action_pts_dict = {
         'PM':   def_PM_pts, 
         'YC':   def_YC_pts, 
         'RC':   def_RC_pts,
-        'BP':   def_BP_pts
+        'BP':   def_BP_pts,
+        'DC':   def_DC_pts
     },
     'MID': {
         'GS':   mid_GS_pts, 
@@ -452,7 +466,8 @@ action_pts_dict = {
         'PM':   mid_PM_pts, 
         'YC':   mid_YC_pts, 
         'RC':   mid_RC_pts,
-        'BP':   mid_BP_pts
+        'BP':   mid_BP_pts,
+        'DC':   mid_DC_pts
     },
     'FWD': {
         'GS':   fwd_GS_pts, 
@@ -465,7 +480,8 @@ action_pts_dict = {
         'PM':   fwd_PM_pts, 
         'YC':   fwd_YC_pts, 
         'RC':   fwd_RC_pts,
-        'BP':   fwd_BP_pts
+        'BP':   fwd_BP_pts,
+        'DC':   fwd_DC_pts
     }
 }
 #---------------------------------------------------------------------------------------------------------#
@@ -487,6 +503,7 @@ for player_dict in players_stats:
     player_fixturesPlayedYellowCards = players_fixturesPlayedYellowCards_dict.get(player_id, [])
     player_fixturesPlayedRedCards = players_fixturesPlayedRedCards_dict.get(player_id, [])
     player_fixturesPlayedBonus = players_fixturesPlayedBonus_dict.get(player_id, [])
+    player_fixturesPlayedDefensiveContribution = players_fixturesPlayedDefensiveContribution_dict.get(player_id, [])
     #---------------------------------------------------------------------------------------------------------#
     player_dict['tot_pts'] = np.sum(player_fixturesPlayedPts, dtype=int)
     player_dict['tot_MP'] = np.sum(player_fixturesPlayedMinutes, dtype=int)
@@ -501,6 +518,7 @@ for player_dict in players_stats:
     player_dict['tot_YC'] = np.sum(player_fixturesPlayedYellowCards, dtype=int)
     player_dict['tot_RC'] = np.sum(player_fixturesPlayedRedCards, dtype=int)
     player_dict['tot_BP'] = np.sum(player_fixturesPlayedBonus, dtype=int)
+    player_dict['tot_DC'] = np.sum(player_fixturesPlayedDefensiveContribution, dtype=int)
     #---------------------------------------------------------------------------------------------------------#
     player_dict['fxtrs_plyd'] = len(player_fixturesPlayedPts)
     player_dict['fxtrs_not_plyd'] = matches_played_dict[player_dict['team']] - player_dict['fxtrs_plyd']
@@ -519,6 +537,7 @@ for player_dict in players_stats:
     player_formFixturesYellowCards = players_formFixturesYellowCards_dict.get(player_id, [])
     player_formFixturesRedCards = players_formFixturesRedCards_dict.get(player_id, [])
     player_formFixturesBonus = players_formFixturesBonus_dict.get(player_id, [])
+    player_formFixturesDefensiveContribution = players_formFixturesDefensiveContribution_dict.get(player_id, [])
     #######################################################################################################################################################################################################################    
     player_dict['med_formPts'], player_dict['MedAbsDev(formPts)'] = calculate_central_tendency_and_deviation(player_formFixturesPts, "median")
     player_dict['avg_formPts'], player_dict['MeanAbsDev(formPts)'] = calculate_central_tendency_and_deviation(player_formFixturesPts, "mean") ### avg_formPts is a player's average score per match, calculated from all matches played by his club in the last 30 days.
@@ -571,6 +590,10 @@ for player_dict in players_stats:
     player_dict['med_formBP'], player_dict['MedAbsDev(formBP)'] = calculate_central_tendency_and_deviation(player_formFixturesBonus, "median")
     player_dict['avg_formBP'], player_dict['MeanAbsDev(formBP)'] = calculate_central_tendency_and_deviation(player_formFixturesBonus, "mean")
     player_dict['StdDev(formBP)'] = np.std(player_formFixturesBonus) if len(player_formFixturesBonus) > 0 else 0
+
+    player_dict['med_formDC'], player_dict['MedAbsDev(formDC)'] = calculate_central_tendency_and_deviation(player_formFixturesDefensiveContribution, "median")
+    player_dict['avg_formDC'], player_dict['MeanAbsDev(formDC)'] = calculate_central_tendency_and_deviation(player_formFixturesDefensiveContribution, "mean")
+    player_dict['StdDev(formDC)'] = np.std(player_formFixturesDefensiveContribution) if len(player_formFixturesDefensiveContribution) > 0 else 0
     #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
     player_dict['med_pts/fxtr'], player_dict['MedAbsDev(pts/fxtr)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedPts + player_fixturesNotPlayedX, "median")
     player_dict['avg_pts/fxtr'], player_dict['MeanAbsDev(pts/fxtr)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedPts + player_fixturesNotPlayedX, "mean") ### avg_pts/fxtr is a player's average score per match, calculated from all matches played by his club throughout the whole season.
@@ -623,6 +646,10 @@ for player_dict in players_stats:
     player_dict['med_BP/fxtr'], player_dict['MedAbsDev(BP/fxtr)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedBonus + player_fixturesNotPlayedX, "median")
     player_dict['avg_BP/fxtr'], player_dict['MeanAbsDev(BP/fxtr)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedBonus + player_fixturesNotPlayedX, "mean")
     player_dict['StdDev(BP/fxtr)'] = np.std(player_fixturesPlayedBonus + player_fixturesNotPlayedX) if len(player_fixturesPlayedBonus + player_fixturesNotPlayedX) > 0 else 0
+
+    player_dict['med_DC/fxtr'], player_dict['MedAbsDev(DC/fxtr)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedDefensiveContribution + player_fixturesNotPlayedX, "median")
+    player_dict['avg_DC/fxtr'], player_dict['MeanAbsDev(DC/fxtr)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedDefensiveContribution + player_fixturesNotPlayedX, "mean")
+    player_dict['StdDev(DC/fxtr)'] = np.std(player_fixturesPlayedDefensiveContribution + player_fixturesNotPlayedX) if len(player_fixturesPlayedDefensiveContribution + player_fixturesNotPlayedX) > 0 else 0
     #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
     player_dict['med_pts/fxtr_plyd'], player_dict['MedAbsDev(pts/fxtr_plyd)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedPts, "median")
     player_dict['avg_pts/fxtr_plyd'], player_dict['MeanAbsDev(pts/fxtr_plyd)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedPts, "mean")
@@ -675,6 +702,10 @@ for player_dict in players_stats:
     player_dict['med_BP/fxtr_plyd'], player_dict['MedAbsDev(BP/fxtr_plyd)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedBonus, "median")
     player_dict['avg_BP/fxtr_plyd'], player_dict['MeanAbsDev(BP/fxtr_plyd)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedBonus, "mean")
     player_dict['StdDev(BP/fxtr_plyd)'] = np.std(player_fixturesPlayedBonus) if len(player_fixturesPlayedBonus) > 0 else 0
+
+    player_dict['med_DC/fxtr_plyd'], player_dict['MedAbsDev(DC/fxtr_plyd)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedDefensiveContribution, "median")
+    player_dict['avg_DC/fxtr_plyd'], player_dict['MeanAbsDev(DC/fxtr_plyd)'] = calculate_central_tendency_and_deviation(player_fixturesPlayedDefensiveContribution, "mean")
+    player_dict['StdDev(DC/fxtr_plyd)'] = np.std(player_fixturesPlayedDefensiveContribution) if len(player_fixturesPlayedDefensiveContribution) > 0 else 0
     #######################################################################################################################################################################################################################
     player_position = player_dict['position']
     
@@ -686,7 +717,7 @@ for player_dict in players_stats:
             i_str = ((i == 'form') * (i + 'Pts')) + ((i != 'form') * ('pts' + i))
             ij_str = 'x(' + ((j + '_' + i_str) if (j == 'med' or j == 'avg') else (j + '(' + i_str + ')')) + ')'
             ij_pts = 0
-            for k in ['MP', 'GS', 'GC', 'OG', 'A', 'CS', 'S', 'PS', 'PM', 'YC', 'RC', 'BP']:
+            for k in ['MP', 'GS', 'GC', 'OG', 'A', 'CS', 'S', 'PS', 'PM', 'YC', 'RC', 'BP', 'DC']:
                 ik_str = ((i == 'form') * (i + k)) + ((i != 'form') * (k + i))
                 ijk_str = (j + '_' + ik_str) if (j == 'med' or j == 'avg') else (j + '(' + ik_str + ')')
                 x = player_dict[ijk_str]
