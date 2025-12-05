@@ -1189,7 +1189,7 @@ for fixture in fixtures_data: # for fixture in upcoming_fixtures_data
 
 nxtGWs_fixtures_df = pd.DataFrame(nxtGWs_fixtures)
 players_df['xPts(avgAdv)'] = round((players_df['xPts(fplAdv)'] + players_df['xPts(defAdv)'] + players_df['xPts(attAdv)']) / 2, 11)
-# players_df['xPts(avgAdv)'] = golden_sum(players_df['1xPts(defAdv)'] + players_df['xPts(attAdv)'], players_df['xPts(fplAdv)'])
+# players_df['xPts(avgAdv)'] = golden_sum(players_df['xPts(defAdv)'] + players_df['xPts(attAdv)'], players_df['xPts(fplAdv)'])
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
