@@ -747,9 +747,9 @@ players_df = players_df.sort_values([
 
     'tot_pts', ### I really hope this is the last sorting criteria!!! I wouldn't like the sorting to resort to the criteria below bcoz they might be problematic!!!
 
-    'x(MedAbsDev(formPts))',       'x(MeanAbsDev(formPts))',          'x(StdDev(formPts))',
-    'x(MedAbsDev(pts/fxtr))',      'x(MeanAbsDev(pts/fxtr))',         'x(StdDev(pts/fxtr))',
-    'x(MedAbsDev(pts/fxtr_plyd))', 'x(MeanAbsDev(pts/fxtr_plyd))',    'x(StdDev(pts/fxtr_plyd))',
+    'x(MedAbsDev(formPts))',       'x(MeanAbsDev(formPts))',          # 'x(StdDev(formPts))',
+    'x(MedAbsDev(pts/fxtr))',      'x(MeanAbsDev(pts/fxtr))',         # 'x(StdDev(pts/fxtr))',
+    'x(MedAbsDev(pts/fxtr_plyd))', 'x(MeanAbsDev(pts/fxtr_plyd))',    # 'x(StdDev(pts/fxtr_plyd))',
 ], 
 ascending=[
     True, 
@@ -760,9 +760,9 @@ ascending=[
     
     False,
     
-    False, False, False,
-    False, False, False,
-    False, False, False,
+    False, False, # False,
+    False, False, # False,
+    False, False, # False,
 ]) # 'formPts' gives you info on which players might be currently <appearing>/<playing well> or not
 ######################################################################################################################################################################################################################################################################################################################################
 
