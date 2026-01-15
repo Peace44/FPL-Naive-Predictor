@@ -1099,6 +1099,7 @@ for fixture in fixtures_data: # for fixture in upcoming_fixtures_data
         home_team = teams_dict[fixture['team_h']]
         away_team = teams_dict[fixture['team_a']]
         
+        fixture_dict['home_avgAdv'] = 0
         fixture_dict['home_attAdv'] = def_teams_stats_df.loc[away_team, 'def_tier'] - att_teams_stats_df.loc[home_team, 'att_tier']
         fixture_dict['home_defAdv'] = att_teams_stats_df.loc[away_team, 'att_tier'] - def_teams_stats_df.loc[home_team, 'def_tier'] 
         fixture_dict['home_fplAdv'] = fpl_teams_stats_df.loc[away_team, 'fpl_tier'] - fpl_teams_stats_df.loc[home_team, 'fpl_tier']
@@ -1109,7 +1110,11 @@ for fixture in fixtures_data: # for fixture in upcoming_fixtures_data
         fixture_dict['away_fplAdv'] = -fixture_dict['home_fplAdv']
         fixture_dict['away_defAdv'] = -fixture_dict['home_attAdv']
         fixture_dict['away_attAdv'] = -fixture_dict['home_defAdv']
-        
+        fixture_dict['away_avgAdv'] = 0
+
+        fixture_dict['home_avgAdv'] = np.mean([fixture_dict['home_fplAdv'], np.mean([fixture_dict['home_defAdv'], fixture_dict['home_attAdv']])])
+        fixture_dict['away_avgAdv'] = -fixture_dict['home_avgAdv']
+
         nxtGWs_fixtures.append(fixture_dict)
         #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
         #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -1191,7 +1196,9 @@ for fixture in fixtures_data: # for fixture in upcoming_fixtures_data
 
 
 nxtGWs_fixtures_df = pd.DataFrame(nxtGWs_fixtures)
-players_df['xPts(avgAdv)'] = golden_sum(players_df['xPts(fplAdv)'], players_df['xPts(defAdv)'] + players_df['xPts(attAdv)'])
+players_df['xPts(avgAdv)'] = round((players_df['xPts(fplAdv)'] + players_df['xPts(defAdv)'] + players_df['xPts(attAdv)']) / 2, 11)
+# players_df['xPts(avgAdv)'] = golden_sum(players_df['xPts(defAdv)'] + players_df['xPts(attAdv)'], players_df['xPts(fplAdv)'])
+# players_df['xPts(avgAdv)'] = golden_sum(players_df['xPts(fplAdv)'], players_df['xPts(defAdv)'] + players_df['xPts(attAdv)'])
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
